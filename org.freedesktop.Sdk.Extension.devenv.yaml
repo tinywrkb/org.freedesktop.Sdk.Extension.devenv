@@ -152,22 +152,22 @@ modules:
   # Packaging: Buildsystems #
   ############################
 
-  - name: meson
-    buildsystem: simple
-    build-commands:
-      - python setup.py build
-      - python setup.py install --skip-build --prefix=${FLATPAK_DEST} --root=/ --optimize=1
-    sources:
-      - type: archive
-        url: https://github.com/mesonbuild/meson/releases/download/0.63.1/meson-0.63.1.tar.gz
-        sha256: 06fe13297213d6ff0121c5d5aab25a56ef938ffec57414ed6086fda272cb65e9
-        x-checker-data:
-          type: anitya
-          project-id: 6472
-          stable-only: true
-          url-template: https://github.com/mesonbuild/meson/releases/download/$version/meson-$version.tar.gz
-    cleanup:
-      - '*'
+# - name: meson
+#   buildsystem: simple
+#   build-commands:
+#     - python setup.py build
+#     - python setup.py install --skip-build --prefix=${FLATPAK_DEST} --root=/ --optimize=1
+#   sources:
+#     - type: archive
+#       url: https://github.com/mesonbuild/meson/releases/download/0.63.1/meson-0.63.1.tar.gz
+#       sha256: 06fe13297213d6ff0121c5d5aab25a56ef938ffec57414ed6086fda272cb65e9
+#       x-checker-data:
+#         type: anitya
+#         project-id: 6472
+#         stable-only: true
+#         url-template: https://github.com/mesonbuild/meson/releases/download/$version/meson-$version.tar.gz
+#   cleanup:
+#     - '*'
 
 
   ############################
