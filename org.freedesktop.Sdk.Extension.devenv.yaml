@@ -3381,7 +3381,7 @@ modules:
             sha256: 50eef6f6a0bbdd685f9e8c207f3c9050f5b578d0a46e37c76a9c4baea2cc2e13
             x-checker-data:
               type: pypi
-              name: bidi
+              name: python-bidi
               packagetype: bdist_wheel
         cleanup:
           - '*'
