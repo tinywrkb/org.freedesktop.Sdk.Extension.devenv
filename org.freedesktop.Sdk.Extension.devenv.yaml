@@ -4545,6 +4545,7 @@ modules:
       - /share/pixmaps
 
   - name: zsh-static
+    # TODO: check ncurses detection in configure
     build-options: *musl-static-build-options
     config-opts:
       # TODO: edit config.modules to compile modules
