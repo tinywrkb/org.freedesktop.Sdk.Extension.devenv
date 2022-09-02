@@ -1519,7 +1519,7 @@ modules:
       - --with-system-ffi
       # TODO: add libmpdec lib?
      #- --with-system-libmpdec
-      - CPPFLAGS=-I${prefix}/include -I${prefix}/include/ncursesw
+      - CPPFLAGS=-I/usr/lib/sdk/devenv/include -I/usr/lib/sdk/devenv/include/ncursesw
    #make-args:
    #  - LINKFORSHARED=
     sources:
@@ -1564,8 +1564,6 @@ modules:
     build-options: *musl-shared-build-options
     buildsystem: simple
     build-commands: *python-setup-build-commands
-    post-install:
-      - ln -s ${FLATPAK_DEST}/lib/libc.musl-x86_64.so.1 ${FLATPAK_DEST}/python/bin/ldd
     sources:
       - type: archive
         url: https://github.com/pyinstaller/pyinstaller/archive/v5.3/pyinstaller-5.3.tar.gz
@@ -1575,6 +1573,9 @@ modules:
           project-id: 122995
           stable-only: true
           url-template: https://github.com/pyinstaller/pyinstaller/archive/v$version/pyinstaller-$version.tar.gz
+      - type: shell
+        commands:
+          - ln -s ${FLATPAK_DEST}/lib/libc.musl-x86_64.so.1 ${FLATPAK_DEST}/python/bin/ldd
     cleanup:
       - '*'
 
