@@ -1011,11 +1011,13 @@ modules:
           - -Dfreetype=enabled
         sources:
           - type: archive
-            url: https://download.gnome.org/sources/pango/1.90/pango-1.90.0.tar.xz
-            sha256: f138f964a8390c8aecc6c79dc18756989cc2d4db624b12f94a01a92ec57111ff
+            url: https://download.gnome.org/sources/pango/1.50/pango-1.50.9.tar.xz
+            sha256: 1b636aabf905130d806372136f5e137b6a27f26d47defd9240bf444f6a4fe610
             x-checker-data:
               type: gnome
               name: pango
+              versions:
+                <: '1.90'
               stable-only: true
         cleanup:
           - '*'
