@@ -17,6 +17,34 @@ An example application, `org.freedesktop.DevEnv`, is used to create a Flatpak in
 but the extension is mainly intended to be used with Flatpak packaged IDEs.
 
 
+## How to build
+
+### Set up build cache
+
+You would want to make sure that ccache is enable and being used by Flatpak Builder (check for ccache hits).  
+Essentially, it mean adding the `--cache` option, setting `CCACHE_DIR` environment variable, if ccache dir is not in the
+default location.  
+Flatpak Builder will mount the ccache dir to `/run/ccache` in the sandbox and will set `CCACHE_DIR` to this path.
+
+To give access to sccache and golang build cache dirs, move them to `CCACHE_DIR/sccache` and `CCACHE_DIR/gocache`
+accordingly, and then linked to them from `XDG_CACHE_DIR/sccache` and `XDG_CACHE_DIR/go-build`, so they will still be
+shared with toolchains running directly in the host environment.
+
+### Dependencies
+
+You will need first to build and install the following SDK extensions:
+
+* [org.freedesktop.Sdk.Extension.musl](https://github.com/tinywrkb/org.freedesktop.Sdk.Extension.musl)
+* [org.freedesktop.Sdk.Extension.go-musl](https://github.com/tinywrkb/org.freedesktop.Sdk.Extension.go-musl)
+* [org.freedesktop.Sdk.Extension.rust-musl](https://github.com/tinywrkb/org.freedesktop.Sdk.Extension.rust-musl)
+* [org.freedesktop.Sdk.Extension.sccache](https://github.com/tinywrkb/org.freedesktop.Sdk.Extension.sccache)
+
+### Building the extension
+
+In addition to the `--ccache` option, I suggest also adding `--disable-updates` to have rebuilds start faster,
+as there are a good number of git sources here.
+
+
 ## TODO
 * helper scripts
   * add enable-sdks.sh
