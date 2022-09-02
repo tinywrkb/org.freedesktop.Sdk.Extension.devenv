@@ -38,6 +38,10 @@ build-options:
       GOPATH=${FLATPAK_BUILDER_BUILDDIR}
       XDG_CACHE_HOME=${FLATPAK_BUILDER_BUILDDIR}/cache
       GOCACHE=$(if [ -n "$CCACHE_DIR" ]; then echo /run/ccache/gocache; fi;)
+    - |
+      PYVARS=
+      PATH=${FLATPAK_DEST}/python/bin:${PATH}
+      LD_LIBRARY_PATH=${FLATPAK_DEST}/python/lib:${LD_LIBRARY_PATH}
 x-musl-static-build-options: &musl-static-build-options
   cflags: -static
   cxxflags: -static
@@ -69,6 +73,12 @@ x-musl-shared-build-options: &musl-shared-build-options
     - CC=x86_64-linux-musl-gcc
     - CXX=x86_64-linux-musl-g++
     - LD=x86_64-linux-musl-ld.mold
+x-python-pip-build-commands: &python-pip-build-commands
+  # TODO: maybe switch to python-installer after new release
+  - eval ${PYVARS} pip3 install --exists-action=i --no-index --no-build-isolation --prefix=${FLATPAK_DEST}/python *.whl
+x-python-setup-build-commands: &python-setup-build-commands
+  - eval ${PYVARS} python3 setup.py build
+  - eval ${PYVARS} python3 setup.py install --skip-build --prefix=${FLATPAK_DEST}/python --root=/ --optimize=1
 
 cleanup:
   - /include
@@ -1478,7 +1488,6 @@ modules:
 
   - name: python
     # TODO: build missing modules
-    # TODO: install to a different prefix, keep it, and install python modules in a venv with relative symlinks
    #build-options: *musl-shared-build-options
     build-options:
       # TODO: maybe set rpath for shared libs
@@ -1487,6 +1496,10 @@ modules:
       # TODO: try getting mold to work
      #ldflags: -fPIC -Bstatic -Wl,--dynamic-linker=/usr/lib/sdk/devenv/lib/libc.musl-x86_64.so.1 -Wl,-fuse-ld=mold
       ldflags: -fPIC -Bstatic -Wl,--dynamic-linker=/usr/lib/sdk/devenv/lib/libc.musl-x86_64.so.1
+      prefix: /usr/lib/sdk/devenv/python
+      libdir: /usr/lib/sdk/devenv/python/lib
+      prepend-path: /usr/lib/sdk/devenv/python/bin
+      prepend-ld-library-path: /usr/lib/sdk/devenv/python/lib
       env:
         - AR=x86_64-linux-musl-ar
         - CC=x86_64-linux-musl-gcc
@@ -1535,29 +1548,24 @@ modules:
   - name: python-wheel
     build-options: *musl-shared-build-options
     buildsystem: simple
-    build-commands:
-      - pip3 install --exists-action=i --no-index --find-links=file://$PWD --prefix=$FLATPAK_DEST
-        wheel --no-build-isolation
+    build-commands: *python-pip-build-commands
     sources:
       - type: file
-        url: https://files.pythonhosted.org/packages/c0/6c/9f840c2e55b67b90745af06a540964b73589256cb10cc10057c87ac78fc2/wheel-0.37.1.tar.gz
-        sha256: e9a504e793efbca1b8e0e9cb979a249cf4a0a7b5b8c9e8b65a5e39d49529c1c4
+        url: https://files.pythonhosted.org/packages/27/d6/003e593296a85fd6ed616ed962795b2f87709c3eee2bca4f6d0fe55c6d00/wheel-0.37.1-py2.py3-none-any.whl
+        sha256: 4bdcd7d840138086126cd09254dc6195fb4fc6f01c050a1d7236f2630db1d22a
         x-checker-data:
           type: pypi
           name: wheel
+          packagetype: bdist_wheel
     cleanup:
       - '*'
 
   - name: pyinstaller
     build-options: *musl-shared-build-options
     buildsystem: simple
-    build-commands:
-      - ln -s ${FLATPAK_DEST}/lib/libc.musl-x86_64.so.1 ${FLATPAK_DEST}/bin/ldd
-     #- |
-     #  cd bootloader
-     #  ./waf all
-      - python3 setup.py build
-      - python3 setup.py install --skip-build --prefix=${FLATPAK_DEST} --root=/ --optimize=1
+    build-commands: *python-setup-build-commands
+    post-install:
+      - ln -s ${FLATPAK_DEST}/lib/libc.musl-x86_64.so.1 ${FLATPAK_DEST}/python/bin/ldd
     sources:
       - type: archive
         url: https://github.com/pyinstaller/pyinstaller/archive/v5.3/pyinstaller-5.3.tar.gz
@@ -1572,9 +1580,7 @@ modules:
 
   - name: pyinstaller-hooks-contrib
     buildsystem: simple
-    build-commands:
-      - python3 setup.py build
-      - python3 setup.py install --skip-build --prefix=${FLATPAK_DEST} --root=/ --optimize=1
+    build-commands: *python-setup-build-commands
     sources:
       - type: archive
         url: https://github.com/pyinstaller/pyinstaller-hooks-contrib/archive/2022.8/pyinstaller-hooks-contrib-2022.8.tar.gz
@@ -1589,9 +1595,7 @@ modules:
 
   - name: altgraph
     buildsystem: simple
-    build-commands:
-      - pip3 install --exists-action=i --no-index --find-links=file://$PWD --prefix=$FLATPAK_DEST
-        altgraph --no-build-isolation
+    build-commands: *python-pip-build-commands
     sources:
       - type: file
         url: https://files.pythonhosted.org/packages/84/3f/1a5c9bef54cac9bf41edd6f4aaf61cd52ed578e10ccc607e0278012cb4a5/altgraph-0.17.2-py2.py3-none-any.whl
@@ -3351,10 +3355,7 @@ modules:
 
   - name: ranger
     buildsystem: simple
-    build-commands:
-      - python3 setup.py build
-      - python3 setup.py install --skip-build --prefix=${FLATPAK_DEST} --root=/ --optimize=1
-      - mv ${FLATPAK_DEST}/bin/ranger{,-org}
+    build-commands: *python-setup-build-commands
     sources:
       - type: archive
         url: https://ranger.github.io/ranger-1.9.3.tar.gz
@@ -3373,9 +3374,7 @@ modules:
     modules:
       - name: python-bidi
         buildsystem: simple
-        build-commands:
-          # TODO: maybe switch to python-installer after new release
-          - pip3 install --exists-action=i --no-index --prefix=${FLATPAK_DEST} --no-build-isolation *.whl
+        build-commands: *python-pip-build-commands
         sources:
           - type: file
             url: https://files.pythonhosted.org/packages/33/b0/f942d146a2f457233baaafd6bdf624eba8e0f665045b4abd69d1b62d097d/python_bidi-0.4.2-py2.py3-none-any.whl
@@ -3389,9 +3388,7 @@ modules:
         modules:
           - name: python-six
             buildsystem: simple
-            build-commands:
-              # TODO: maybe switch to python-installer after new release
-              - pip3 install --exists-action=i --no-index --prefix=${FLATPAK_DEST} --no-build-isolation *.whl
+            build-commands: *python-pip-build-commands
             sources:
               - type: file
                 url: https://files.pythonhosted.org/packages/d9/5a/e7c31adbe875f2abbb91bd84cf2dc52d792b5a01506781dbcf25c91daf11/six-1.16.0-py2.py3-none-any.whl
@@ -3404,9 +3401,7 @@ modules:
               - '*'
       - name: python-chardet
         buildsystem: simple
-        build-commands:
-          # TODO: maybe switch to python-installer after new release
-          - pip3 install --exists-action=i --no-index --prefix=${FLATPAK_DEST} --no-build-isolation *.whl
+        build-commands: *python-pip-build-commands
         sources:
           - type: file
             url: https://files.pythonhosted.org/packages/4c/d1/1b96dd69fa42f20b70701b5cd42a75dd5f0c7a24dc0abfef35cc146210dc/chardet-5.0.0-py3-none-any.whl
@@ -3422,8 +3417,9 @@ modules:
     build-options: *musl-shared-build-options
     buildsystem: simple
     build-commands:
-      - ln -s ${FLATPAK_DEST}/bin/ranger-org ranger-portable
+      - ln -s ${FLATPAK_DEST}/python/bin/ranger ranger-portable
       - |
+        eval ${PYVARS} \
         pyinstaller --onedir \
           --collect-all ranger \
           --collect-all bidi \
@@ -3433,7 +3429,7 @@ modules:
       - cp -r dist/ranger-portable ${FLATPAK_DEST}/lib/
       - ln -s ../lib/ranger-portable/ranger-portable ${FLATPAK_DEST}/bin/ranger
     cleanup:
-      - /lib/python*
+      - /python/lib/python*
 
   - name: vifm-static
     build-options: *musl-static-build-options
@@ -3661,12 +3657,8 @@ modules:
 #       build-options: *musl-shared-build-options
 #       buildsystem: simple
 #       build-commands:
-#         - pip3 install --exists-action=i --no-index --find-links=file://$PWD --prefix=$FLATPAK_DEST
-#           trash-cli --no-build-isolation
-#         - |
-#           for app in trash{,-empty,-list,-put,-restore,-rm}; do
-#             mv ${FLATPAK_DEST}/bin/${app}{,-org}
-#           done
+#         - eval ${PYVARS} pip3 install --exists-action=i --no-index --find-links=file://${PWD} --no-build-isolation
+#           --prefix=${FLATPAK_DEST}/python trash-cli
 #       sources:
 #         - type: file
 #           url: https://files.pythonhosted.org/packages/36/d2/6415cda6cdd81ee0eb07b357e96a03c96a78af324d7eb2c52ff51d080210/trash-cli-0.22.4.16.tar.gz
@@ -3689,13 +3681,13 @@ modules:
 #   build-commands:
 #     - |
 #       for app in trash{,-empty,-list,-put,-restore,-rm}; do
-#         ln -s ${FLATPAK_DEST}/bin/${app}-org ${app}
+#         ln -s ${FLATPAK_DEST}/python/bin/${app} ${app}
 #       done
 #    #- |
 #    #  for app in trash{,-empty,-list,-put,-restore,-rm}; do
 #    #    pyi-makespec ${app}
 #    #  done
-#     - pyinstaller trashcli.spec
+#     - eval ${PYVARS} pyinstaller trashcli.spec
 #     - install -dm755 ${FLATPAK_DEST}/lib/trash-cli-portable
 #     - |
 #       for app in trash{,-empty,-list,-put,-restore,-rm}; do
@@ -3709,7 +3701,7 @@ modules:
 #     - type: file
 #       path: trashcli.spec
 #   cleanup:
-#     - /lib/python*
+#     - /python/lib/python*
 
 
   ############################
