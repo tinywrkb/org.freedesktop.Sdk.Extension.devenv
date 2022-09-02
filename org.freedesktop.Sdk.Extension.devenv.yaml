@@ -1078,6 +1078,7 @@ modules:
                       - '*'
                     modules:
                       - name: harfbuzz-static
+                        # TODO: use globally set build options
                        #build-options: *musl-static-build-options
                         build-options:
                           cflags: -static -fno-exceptions -fno-rtti
@@ -1909,6 +1910,7 @@ modules:
           url-template: https://github.com/bugaevc/wl-clipboard/archive/v$version/wl-clipboard-$version.tar.gz
 
   - name: xclip-static
+    # TODO: use globally set build options
    #build-options: *musl-static-build-options
     build-options:
       cflags: -static
