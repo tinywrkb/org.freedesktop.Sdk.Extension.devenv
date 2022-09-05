@@ -10,6 +10,7 @@ sdk-extensions:
   - org.freedesktop.Sdk.Extension.musl
   - org.freedesktop.Sdk.Extension.rust-musl
   - org.freedesktop.Sdk.Extension.sccache
+
 build-options:
   cflags: -I/usr/lib/sdk/devenv/include
   cxxflags: -I/usr/lib/sdk/devenv/include
@@ -42,11 +43,12 @@ build-options:
       PYVARS=
       PATH=${FLATPAK_DEST}/python/bin:${PATH}
       LD_LIBRARY_PATH=${FLATPAK_DEST}/python/lib:${LD_LIBRARY_PATH}
+
 x-musl-static-build-options: &musl-static-build-options
-  cflags: -static
-  cxxflags: -static
-  ldflags: -static -Wl,-fuse-ld=mold
-  env:
+  cflags: -static -fPIC
+  cxxflags: -static -fPIC
+  ldflags: -static -fPIC -Wl,-fuse-ld=mold
+  env: &musl-toolchain-environment
     - AR=x86_64-linux-musl-ar
     - CC=x86_64-linux-musl-gcc
     - CXX=x86_64-linux-musl-g++
@@ -55,34 +57,24 @@ x-musl-static-build-options: &musl-static-build-options
    #- PKG_CONFIG_LIBDIR=
    #- PKG_CONFIG_PATH=/lib/pkgconfig:/share/pkgconfig
    #- PKG_CONFIG_SYSROOT_DIR=/usr/lib/sdk/devenv
-x-musl-static-fpic-build-options: &musl-static-fpic-build-options
-  cflags: -static -fPIC
-  cxxflags: -static -fPIC
-  ldflags: -static -fPIC -Wl,-fuse-ld=mold
-  env:
-    - AR=x86_64-linux-musl-ar
-    - CC=x86_64-linux-musl-gcc
-    - CXX=x86_64-linux-musl-g++
-    - LD=x86_64-linux-musl-ld.mold
+
 x-musl-shared-build-options: &musl-shared-build-options
   cflags: -fPIC -Bstatic -Wl,--dynamic-linker=/usr/lib/sdk/devenv/lib/libc.musl-x86_64.so.1
   cxxflags: -fPIC -Bstatic -Wl,--dynamic-linker=/usr/lib/sdk/devenv/lib/libc.musl-x86_64.so.1
   ldflags: -fPIC -Bstatic -Wl,--dynamic-linker=/usr/lib/sdk/devenv/lib/libc.musl-x86_64.so.1
     -Wl,-fuse-ld=mold
-  env:
-    - AR=x86_64-linux-musl-ar
-    - CC=x86_64-linux-musl-gcc
-    - CXX=x86_64-linux-musl-g++
-    - LD=x86_64-linux-musl-ld.mold
+  env: *musl-toolchain-environment
 
 x-cargo-build-commands: &cargo-build-commands
   - eval ${CARGO_VARS} ${CARGO_VARS_EXTRA} cargo fetch
   - eval ${CARGO_VARS} ${CARGO_VARS_EXTRA} cargo build --release
+
 x-golang-online-build-commands: &golang-online-build-commands
   - eval ${GOVARS} ${GOVARS_EXTRA} go get
   - exit 1
 x-golang-offline-build-commands: &golang-offline-build-commands
   - eval ${GOVARS} ${GOVARS_EXTRA} go install
+
 x-python-pip-build-commands: &python-pip-build-commands
   # TODO: maybe switch to python-installer after new release
   - eval ${PYVARS} pip3 install --exists-action=i --no-index --no-build-isolation
@@ -199,8 +191,7 @@ modules:
   # Libraries: Data compression
 
   - name: bzip2-static
-    # NOTE: python needs -fPIC
-    build-options: *musl-static-fpic-build-options
+    build-options: *musl-static-build-options
     no-autogen: true
     make-install-args:
       - PREFIX=${FLATPAK_DEST}
@@ -244,8 +235,7 @@ modules:
       - '*'
 
   - name: xz-static
-    # NOTE: python needs -fPIC
-    build-options: *musl-static-fpic-build-options
+    build-options: *musl-static-build-options
     config-opts:
       - --disable-shared
       - --disable-nls
@@ -269,8 +259,7 @@ modules:
       - '*'
 
   - name: zlib-static
-    # NOTE: python needs -fPIC
-    build-options: *musl-static-fpic-build-options
+    build-options: *musl-static-build-options
     config-opts:
       - --static
     sources:
@@ -341,8 +330,7 @@ modules:
           - '*'
 
   - name: expat-static
-    # NOTE: python needs -fPIC
-    build-options: *musl-static-fpic-build-options
+    build-options: *musl-static-build-options
     buildsystem: cmake
     config-opts:
       - -DEXPAT_BUILD_TOOLS=OFF
@@ -456,8 +444,7 @@ modules:
               - '*'
 
   - name: libffi-static
-    # NOTE: python needs -fPIC
-    build-options: *musl-static-fpic-build-options
+    build-options: *musl-static-build-options
     config-opts:
       - --disable-shared
     sources:
@@ -490,8 +477,7 @@ modules:
       - '*'
 
   - name: libjpeg-turbo-static
-    # NOTE: librsvg needs -fPIC
-    build-options: *musl-static-fpic-build-options
+    build-options: *musl-static-build-options
     buildsystem: cmake
     config-opts:
       - -DENABLE_SHARED=OFF
@@ -560,8 +546,7 @@ modules:
       - '*'
 
   - name: readline-static
-    # NOTE: python needs -fPIC
-    build-options: *musl-static-fpic-build-options
+    build-options: *musl-static-build-options
     config-opts:
       - --disable-shared
       - --with-curses
@@ -580,8 +565,7 @@ modules:
       - '*'
     modules:
       - name: ncurses-static
-        # NOTE: python needs -fPIC
-        build-options: *musl-static-fpic-build-options
+        build-options: *musl-static-build-options
         config-opts:
           - --without-dlsym
           - --with-terminfo-dirs=${datadir}/share/terminfo:/var/lib/devenv/share/terminfo:/usr/share/terminfo
@@ -671,8 +655,7 @@ modules:
   #  Libraries: Level2
 
   - name: gdbm-static # depends on readline
-    # NOTE: python needs -fPIC
-    build-options: *musl-static-fpic-build-options
+    build-options: *musl-static-build-options
     config-opts:
       - --disable-shared
       - --enable-libgdbm-compat
@@ -692,7 +675,7 @@ modules:
       - '*'
 
   - name: krb5-static
-    build-options: *musl-static-fpic-build-options
+    build-options: *musl-static-build-options
     subdir: src
     config-opts:
       - --localstatedir=/var/lib
@@ -753,8 +736,7 @@ modules:
       - '*'
 
   - name: libpng-static # depends on zlib
-    # NOTE: librsvg needs -fPIC
-    build-options: *musl-static-fpic-build-options
+    build-options: *musl-static-build-options
     config-opts:
       - --enable-static
     make-args:
@@ -796,8 +778,7 @@ modules:
 
   - name: libxml2-static # depends on ncurses readline xz zlib
     # TODO: test if icu should be enabled
-    # NOTE: librsvg needs -fPIC
-    build-options: *musl-static-fpic-build-options
+    build-options: *musl-static-build-options
     config-opts:
       - --enable-static
       - --without-python
@@ -814,8 +795,7 @@ modules:
       - '*'
 
   - name: pcre-static # depends on bzip2 readline zlib
-    # NOTE: librsvg needs -fPIC
-    build-options: *musl-static-fpic-build-options
+    build-options: *musl-static-build-options
     config-opts:
       - --disable-shared
     sources:
@@ -852,8 +832,7 @@ modules:
       - '*'
 
   - name: sqlite-static # depends on readline tcl(util) zlib
-    # NOTE: python needs -fPIC
-    build-options: *musl-static-fpic-build-options
+    build-options: *musl-static-build-options
     config-opts:
       - --disable-shared
       - --disable-tcl
@@ -2280,8 +2259,7 @@ modules:
           - '*'
         modules:
           - name: mpack-static
-            # NOTE: lua-mpack needs -fPIC
-            build-options: *musl-static-fpic-build-options
+            build-options: *musl-static-build-options
             no-autogen: true
             make-install-args:
               - PREFIX=${FLATPAK_DEST}

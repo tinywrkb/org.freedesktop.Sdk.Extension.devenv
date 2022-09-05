@@ -65,7 +65,7 @@ as there are a good number of git sources here.
   * prioritize shared linked: difftastic
 * evaluate setting default flags
   * hardening: stack protection, fortify source, ...
-  * pie libs, static-pie executables, gcc --enable-default-pie
+  * static-pie executables, gcc --enable-default-pie
 * modules to add
   * iso manipulation tools: cdrtools, fuseiso
   * filesystems fuse tools: at least for dos/fat, ext2/3/4, overlayfs
