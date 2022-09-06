@@ -2933,13 +2933,10 @@ modules:
           - --enable-static_link
           - --with-staticdir=${bindir}
         make-args:
-          - device_mapper
+          - libdm.device-mapper
         install-rule: install_device-mapper
         make-install-args:
-          - INSTALL_TYPE=install_static
-        post-install:
-          - install -Dm644 libdm/libdevmapper.pc ${FLATPAK_DEST}/lib/pkgconfig/devmapper.pc
-          - rm -f ${FLATPAK_DEST}/bin/{dmsetup,dmstats}*
+          - INSTALL_TYPE=install_static install_pkgconfig
         sources:
           - type: archive
             url: http://mirrors.kernel.org/sourceware/lvm2/LVM2.2.03.16.tgz
@@ -2949,12 +2946,20 @@ modules:
               project-id: 5354
               stable-only: true
               url-template: http://mirrors.kernel.org/sourceware/lvm2/LVM2.$version.tgz
+          - type: shell
+            commands:
+              - sed -i '/^TARGETS =/d' libdm/Makefile.in
+              - sed -i '/^LIB_SHARED =/d' libdm/Makefile.in
+              - sed -i 's/$(LIBDM_SHARED)/$(LIBDM_STATIC)/' libdm/dm-tools/Makefile.in
+              - sed -i '/^SUBDIRS=dm-tools/d' libdm/Makefile.in
         cleanup:
           - '*'
         modules:
           - name: libaio-static
             build-options: *musl-static-build-options
             no-autogen: true
+            make-args:
+              - ENABLE_SHARED=0
             make-install-args:
               - prefix=${FLATPAK_DEST}
               - ENABLE_SHARED=0
