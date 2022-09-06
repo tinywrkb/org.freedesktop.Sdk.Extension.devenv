@@ -626,6 +626,7 @@ modules:
       - type: shell
         commands:
           - rm -rf pkgs/sqlite3*
+          - sed -i 's/enable-shared/disable-shared/' unix/Makefile.in
     cleanup:
       - '*'
 
