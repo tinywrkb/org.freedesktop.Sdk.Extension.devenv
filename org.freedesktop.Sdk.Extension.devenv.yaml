@@ -45,9 +45,9 @@ build-options:
       LD_LIBRARY_PATH=${FLATPAK_DEST}/python/lib:${LD_LIBRARY_PATH}
 
 x-musl-static-build-options: &musl-static-build-options
-  cflags: -static -fPIC
-  cxxflags: -static -fPIC
-  ldflags: -static -fPIC -Wl,-fuse-ld=mold
+  cflags: -static -static-pie -fPIC
+  cxxflags: -static -static-pie -fPIC
+  ldflags: -static -static-pie -fPIC -Wl,-fuse-ld=mold
   env: &musl-toolchain-environment
     - AR=x86_64-linux-musl-ar
     - CC=x86_64-linux-musl-gcc
