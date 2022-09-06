@@ -4495,7 +4495,13 @@ modules:
           url-template: https://github.com/cykerway/complete-alias/archive/$version/complete-alias-$version.tar.gz
 
   - name: fish-static
-    build-options: *musl-static-build-options
+    # TODO: fix ncurses detection to avoid cxxflags definition
+   #build-options: *musl-static-build-options
+    build-options:
+      cflags: -static -static-pie -fPIC
+      cxxflags: -static -static-pie -fPIC -DHAVE_NCURSES_H -DHAVE_TERM_H
+      ldflags: -static -static-pie -fPIC -Wl,-fuse-ld=mold
+      env: *musl-toolchain-environment
     buildsystem: cmake
     config-opts:
       - -DCMAKE_BUILD_TYPE=Release
@@ -4507,7 +4513,7 @@ modules:
       - -DTPARM_INCLUDES=/usr/lib/sdk/devenv/include/ncursesw/term.h
       - -DNCURSES_LIBRARY=/usr/lib/sdk/devenv/lib/libncursesw.a
       - -DCURSES_TINFO=/usr/lib/sdk/devenv/lib/libncursesw.a
-      - -DCMAKE_CXX_FLAGS=-DHAVE_NCURSES_H -DHAVE_TERM_H
+     #- -DCMAKE_CXX_FLAGS=-DHAVE_NCURSES_H -DHAVE_TERM_H
       - -DTPUTS_USES_INT_ARG=1
     sources:
       - type: archive
