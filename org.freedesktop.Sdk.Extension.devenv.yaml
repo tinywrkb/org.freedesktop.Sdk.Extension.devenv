@@ -4354,7 +4354,6 @@ modules:
           url-template: https://github.com/rfjakob/gocryptfs/releases/download/v$version/gocryptfs_v${version}_linux-static_amd64.tar.gz
 
   - name: gpg-tui-static
-    # TODO: enable back static-pie after getting musl libc built with pie
     build-options: *musl-static-build-options
     buildsystem: simple
     build-commands: *cargo-build-commands
