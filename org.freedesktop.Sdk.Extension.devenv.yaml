@@ -1649,24 +1649,8 @@ modules:
           project-id: 1970
           stable-only: true
           url-template: https://archive.mesa3d.org//mesa-$version.tar.xz
-      - type: shell
-        commands:
-          # TODO: use single patch
-          - sed -i 's/shared_library/static_library/' src/{egl,gbm,glx,gallium/targets/dri}/meson.build
-          - sed -i '/^libegl =/,/^)$/{ /soversion/d;/version/d;/vs_module_defs/d }' src/egl/meson.build
-          - sed -i '/link_for_egl/ s/libglapi/libglapi_static/' src/egl/meson.build
-          - sed -i '/^libgbm =/,/^)$/{ /version/d }' src/gbm/meson.build
-          - sed -i '/elif not with_shared_glapi/d;/EGL requires shared-glapi/d' meson.build
-          - sed -i 's/\.so/.a/g' src/gallium/targets/dri/meson.build
-          - sed -i '/^libgallium_dri =/,/^)$/{ /name_suffix/ s/so/a/ }' src/gallium/targets/dri/meson.build
-          - sed -i '/while ext/ s/\.so/.a/' bin/install_megadrivers.py
-          - sed -i '/^if not with_shared_glapi/,/^endif$/d' meson.build
-          - sed -i '/^libgles2 =/,/^)$/{ s/shared_library/static_library/;/version/d }' src/mapi/es2api/meson.build
-          - sed -i '/^libmesa =/,/^)$/{ /build_by_default/ s/false/true/ }' src/mesa/meson.build
-          - |
-            sed -i '/^libmesa =/,/^)$/{ s/build_by_default.*/& \n  install : true,/ }' src/mesa/meson.build
-          - sed -i '/dri based GLX requires/ s/error/message/' meson.build
-          - sed -i '/^libgl =/,/^)$/{ /version/d }' src/glx/meson.build
+      - type: patch
+        path: mesa-static-libs.patch
     cleanup:
       - '*'
     modules:

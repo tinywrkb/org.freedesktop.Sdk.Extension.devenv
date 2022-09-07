@@ -1,0 +1,286 @@
+diff --git a/bin/install_megadrivers.py b/bin/install_megadrivers.py
+index 60ee457..6f81ae1 100644
+--- a/bin/install_megadrivers.py
++++ b/bin/install_megadrivers.py
+@@ -62,7 +62,7 @@ def main():
+             os.chdir(to)
+ 
+             name, ext = os.path.splitext(driver)
+-            while ext != '.so':
++            while ext != '.a':
+                 if os.path.lexists(name):
+                     os.unlink(name)
+                 os.symlink(driver, name)
+@@ -73,7 +73,7 @@ def main():
+     # Remove meson-created master .so and symlinks
+     os.unlink(master)
+     name, ext = os.path.splitext(master)
+-    while ext != '.so':
++    while ext != '.a':
+         if os.path.lexists(name):
+             os.unlink(name)
+         name, ext = os.path.splitext(name)
+diff --git a/meson.build b/meson.build
+index 70a0d57..479ba33 100644
+--- a/meson.build
++++ b/meson.build
+@@ -148,15 +148,6 @@ else
+ endif
+ 
+ # shared-glapi is required if at least two OpenGL APIs are being built
+-if not with_shared_glapi
+-  if ((with_gles1 == 'enabled' and with_gles2 == 'enabled') or
+-      (with_gles1 == 'enabled' and with_opengl) or
+-      (with_gles2 == 'enabled' and with_opengl))
+-    error('shared-glapi required for building two or more of OpenGL, OpenGL ES 1.x, OpenGL ES 2.x')
+-  endif
+-  with_gles1 = 'disabled'
+-  with_gles2 = 'disabled'
+-endif
+ 
+ # We require OpenGL for OpenGL ES
+ if not with_opengl
+@@ -463,8 +454,6 @@ if _egl == 'auto'
+ elif _egl == 'enabled'
+   if not with_dri and not with_platform_haiku and not with_platform_windows
+     error('EGL requires dri, haiku, or windows')
+-  elif not with_shared_glapi
+-    error('EGL requires shared-glapi')
+   elif not ['disabled', 'dri'].contains(with_glx)
+     error('EGL requires dri, but a GLX is being built without dri')
+   elif host_machine.system() == 'darwin'
+@@ -566,7 +555,7 @@ if with_glx != 'disabled'
+     endif
+   elif with_glx == 'dri'
+     if not with_shared_glapi
+-      error('dri based GLX requires shared-glapi')
++      message('dri based GLX requires shared-glapi')
+     endif
+   endif
+ endif
+diff --git a/src/egl/meson.build b/src/egl/meson.build
+index 315a950..f1b0d4c 100644
+--- a/src/egl/meson.build
++++ b/src/egl/meson.build
+@@ -177,7 +177,7 @@ else
+   )
+ endif
+ 
+-libegl = shared_library(
++libegl = static_library(
+   egl_lib_name,
+   files_egl,
+   c_args : [
+@@ -187,14 +187,11 @@ libegl = shared_library(
+   cpp_args : [cpp_args_for_egl],
+   gnu_symbol_visibility : 'hidden',
+   include_directories : incs_for_egl,
+-  link_with : [link_for_egl, libglapi],
++  link_with : [link_for_egl, libglapi_static],
+   link_args : [ld_args_bsymbolic, ld_args_gc_sections],
+   dependencies : [deps_for_egl, dep_dl, dep_libdrm, dep_clock, dep_thread, idep_mesautil],
+   install : true,
+-  version : egl_lib_version,
+-  soversion : egl_lib_soversion,
+   name_prefix : 'lib', # even on windows
+-  vs_module_defs : 'main/egl.def'
+ )
+ 
+ if not with_glvnd
+diff --git a/src/gallium/targets/dri/meson.build b/src/gallium/targets/dri/meson.build
+index 8554b15..2fb880c 100644
+--- a/src/gallium/targets/dri/meson.build
++++ b/src/gallium/targets/dri/meson.build
+@@ -37,7 +37,7 @@ if with_ld_dynamic_list
+   gallium_dri_link_depends += files('../dri-vdpau.dyn')
+ endif
+ 
+-libgallium_dri = shared_library(
++libgallium_dri = static_library(
+   'gallium_dri',
+   files('target.c'),
+   include_directories : [
+@@ -63,58 +63,58 @@ libgallium_dri = shared_library(
+   # Will be deleted during installation, see install_megadrivers.py
+   install : true,
+   install_dir : dri_drivers_path,
+-  name_suffix : 'so',
++  name_suffix : 'a',
+ )
+ 
+ foreach d : [[with_gallium_kmsro, [
+-               'armada-drm_dri.so',
+-               'exynos_dri.so',
+-               'hx8357d_dri.so',
+-               'ili9225_dri.so',
+-               'ili9341_dri.so',
+-               'imx-drm_dri.so',
+-               'imx-dcss_dri.so',
+-               'ingenic-drm_dri.so',
+-               'kirin_dri.so',
+-               'komeda_dri.so',
+-               'mali-dp_dri.so',
+-               'mcde_dri.so',
+-               'mediatek_dri.so',
+-               'meson_dri.so',
+-               'mi0283qt_dri.so',
+-               'mxsfb-drm_dri.so',
+-               'pl111_dri.so',
+-               'rcar-du_dri.so',
+-               'repaper_dri.so',
+-               'rockchip_dri.so',
+-               'st7586_dri.so',
+-               'st7735r_dri.so',
+-               'stm_dri.so',
+-	       'sun4i-drm_dri.so',
++               'armada-drm_dri.a',
++               'exynos_dri.a',
++               'hx8357d_dri.a',
++               'ili9225_dri.a',
++               'ili9341_dri.a',
++               'imx-drm_dri.a',
++               'imx-dcss_dri.a',
++               'ingenic-drm_dri.a',
++               'kirin_dri.a',
++               'komeda_dri.a',
++               'mali-dp_dri.a',
++               'mcde_dri.a',
++               'mediatek_dri.a',
++               'meson_dri.a',
++               'mi0283qt_dri.a',
++               'mxsfb-drm_dri.a',
++               'pl111_dri.a',
++               'rcar-du_dri.a',
++               'repaper_dri.a',
++               'rockchip_dri.a',
++               'st7586_dri.a',
++               'st7735r_dri.a',
++               'stm_dri.a',
++	       'sun4i-drm_dri.a',
+              ]],
+-             [with_gallium_radeonsi, 'radeonsi_dri.so'],
+-             [with_gallium_nouveau, 'nouveau_dri.so'],
+-             [with_gallium_freedreno, ['msm_dri.so', 'kgsl_dri.so']],
+-             [with_gallium_softpipe, 'swrast_dri.so'],
+-             [with_gallium_softpipe and with_gallium_drisw_kms, 'kms_swrast_dri.so'],
+-             [with_gallium_v3d, 'v3d_dri.so'],
+-             [with_gallium_vc4, 'vc4_dri.so'],
+-             [with_gallium_panfrost, 'panfrost_dri.so'],
+-             [with_gallium_etnaviv, 'etnaviv_dri.so'],
+-             [with_gallium_tegra, 'tegra_dri.so'],
+-             [with_gallium_crocus, 'crocus_dri.so'],
+-             [with_gallium_iris, 'iris_dri.so'],
+-             [with_gallium_i915, 'i915_dri.so'],
+-             [with_gallium_r300, 'r300_dri.so'],
+-             [with_gallium_r600, 'r600_dri.so'],
+-             [with_gallium_svga, 'vmwgfx_dri.so'],
++             [with_gallium_radeonsi, 'radeonsi_dri.a'],
++             [with_gallium_nouveau, 'nouveau_dri.a'],
++             [with_gallium_freedreno, ['msm_dri.a', 'kgsl_dri.a']],
++             [with_gallium_softpipe, 'swrast_dri.a'],
++             [with_gallium_softpipe and with_gallium_drisw_kms, 'kms_swrast_dri.a'],
++             [with_gallium_v3d, 'v3d_dri.a'],
++             [with_gallium_vc4, 'vc4_dri.a'],
++             [with_gallium_panfrost, 'panfrost_dri.a'],
++             [with_gallium_etnaviv, 'etnaviv_dri.a'],
++             [with_gallium_tegra, 'tegra_dri.a'],
++             [with_gallium_crocus, 'crocus_dri.a'],
++             [with_gallium_iris, 'iris_dri.a'],
++             [with_gallium_i915, 'i915_dri.a'],
++             [with_gallium_r300, 'r300_dri.a'],
++             [with_gallium_r600, 'r600_dri.a'],
++             [with_gallium_svga, 'vmwgfx_dri.a'],
+              [with_gallium_virgl or
+                (with_gallium_freedreno and with_freedreno_virtio),
+-               'virtio_gpu_dri.so'],
+-             [with_gallium_lima, 'lima_dri.so'],
+-             [with_gallium_zink, 'zink_dri.so'],
+-             [with_gallium_d3d12, 'd3d12_dri.so'],
+-             [with_gallium_asahi, 'asahi_dri.so']]
++               'virtio_gpu_dri.a'],
++             [with_gallium_lima, 'lima_dri.a'],
++             [with_gallium_zink, 'zink_dri.a'],
++             [with_gallium_d3d12, 'd3d12_dri.a'],
++             [with_gallium_asahi, 'asahi_dri.a']]
+   if d[0]
+     gallium_dri_drivers += d[1]
+   endif
+diff --git a/src/gbm/meson.build b/src/gbm/meson.build
+index ccdc517..1e6472e 100644
+--- a/src/gbm/meson.build
++++ b/src/gbm/meson.build
+@@ -45,7 +45,7 @@ if with_platform_wayland
+   incs_gbm += inc_wayland_drm
+ endif
+ 
+-libgbm = shared_library(
++libgbm = static_library(
+   'gbm',
+   files_gbm,
+   include_directories : incs_gbm,
+@@ -54,7 +54,6 @@ libgbm = shared_library(
+   link_with : libloader,
+   dependencies : [deps_gbm, dep_dl, dep_thread, idep_mesautil, idep_xmlconfig],
+   gnu_symbol_visibility : 'hidden',
+-  version : '1.0.0',
+   install : true,
+ )
+ 
+diff --git a/src/glx/meson.build b/src/glx/meson.build
+index 8f642d5..b9741c0 100644
+--- a/src/glx/meson.build
++++ b/src/glx/meson.build
+@@ -140,7 +140,7 @@ libglx = static_library(
+   ],
+ )
+ 
+-libgl = shared_library(
++libgl = static_library(
+   gl_lib_name,
+   [],
+   link_with : [libglapi_static, libglapi],
+@@ -151,8 +151,6 @@ libgl = shared_library(
+     dep_x11_xcb, dep_xcb_dri2, dep_xext, dep_xfixes, dep_xxf86vm,
+     dep_xcb_shm, extra_deps_libgl,
+   ],
+-  version : gl_lib_version,
+-  darwin_versions : '4.0.0',
+   install : true,
+ )
+ 
+diff --git a/src/mapi/es2api/meson.build b/src/mapi/es2api/meson.build
+index 356c576..ea11680 100644
+--- a/src/mapi/es2api/meson.build
++++ b/src/mapi/es2api/meson.build
+@@ -32,7 +32,7 @@ if with_platform_windows
+   _es2_c_args += ['-D_GDI32_', '-DBUILD_GL32']
+ endif
+ 
+-libgles2 = shared_library(
++libgles2 = static_library(
+   'GLESv2' + get_option('gles-lib-suffix'),
+   ['../entry.c', es2_glapi_mapi_tmp_h],
+   c_args : [
+@@ -47,9 +47,6 @@ libgles2 = shared_library(
+   include_directories : [inc_src, inc_include, inc_mapi],
+   link_with : libglapi,
+   dependencies : [dep_thread, dep_libdrm, dep_m, dep_dl],
+-  soversion : host_machine.system() == 'windows' ? '' : '2',
+-  version : '2.0.0',
+-  darwin_versions : '3.0.0',
+   name_prefix : 'lib',
+   install : true,
+ )
+diff --git a/src/mesa/meson.build b/src/mesa/meson.build
+index bc79634..c33512e 100644
+--- a/src/mesa/meson.build
++++ b/src/mesa/meson.build
+@@ -509,6 +509,7 @@ libmesa = static_library(
+   ],
+   link_with : [libglsl, libmesa_sse41],
+   dependencies : [idep_nir_headers, dep_vdpau, idep_mesautil],
+-  build_by_default : false,
++  build_by_default : true,
++  install : true,
+ )
+ 
