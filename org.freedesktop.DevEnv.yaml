@@ -64,6 +64,8 @@ finish-args:
 # fish
   - --filesystem=xdg-config/fish:ro
   - --filesystem=xdg-data/fish:ro
+# foot
+  - --filesystem=xdg-config/foot:ro
 # git
   - --filesystem=xdg-config/git:ro
 # gnupg
