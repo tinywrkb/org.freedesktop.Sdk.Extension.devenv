@@ -5463,16 +5463,47 @@ modules:
       - -Dime=true
       - -Dgrapheme-clustering=enabled
       - -Dtests=false
+      - -Dterminfo=enabled
     sources:
       - type: archive
-        url: https://codeberg.org/dnkl/foot/archive/1.13.0.tar.gz
-        sha256: 9fd10584d40f6aac6b87c11a94e1fdfc4bac43aef9144f4aa84213257672da8c
+        url: https://codeberg.org/dnkl/foot/archive/1.13.1.tar.gz
+        sha256: 604f777fdaccfc1ee2d20376cc5688a819dcd6b7113725880cc973194fd6c737
         x-checker-data:
           type: anitya
           project-id: 141611
           stable-only: true
           url-template: https://codeberg.org/dnkl/foot/archive/$version.tar.gz
     modules:
+      - name: ncurses-progs-static # foot terminfo generation doesn't work with runtime's tic
+        # TODO: try patching foot buildsystem instead of this
+        build-options: *musl-static-build-options
+        no-make-install: true
+        config-opts:
+          - --without-dlsym
+          - --with-progs
+          - --enable-widec
+          - --disable-db-install
+          - --disable-pc-files
+          - --without-normal
+          - --without-cxx
+          - --without-cxx-binding
+          - --without-ada
+          - --without-debug
+          - --without-manpages
+          - --without-tests
+        build-commands:
+          - install -Dm755 progs/{infocmp,tic} -t ${FLATPAK_DEST}/bin/
+        sources:
+          - type: archive
+            url: https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.3.tar.gz
+            sha256: 97fc51ac2b085d4cde31ef4d2c3122c21abc217e9090a43a30fc5ec21684e059
+            x-checker-data:
+              type: anitya
+              project-id: 234776
+              stable-only: true
+              url-template: https://ftp.gnu.org/pub/gnu/ncurses/ncurses-$version.tar.gz
+        cleanup:
+          - '*'
       - name: fcft-static
         build-options: *musl-static-build-options
         buildsystem: meson
