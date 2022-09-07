@@ -5482,6 +5482,7 @@ modules:
           - |
             unset WAYLAND_DISPLAY
             export LIBGL_ALWAYS_SOFTWARE=1 __GLX_VENDOR_LIBRARY_NAME=mesa
+            export WLR_RENDERER=pixman
             export XCURSOR_THEME=${XCURSOR_THEME:-Adwaita}
             exec cage -- foot "$@"
     modules:
