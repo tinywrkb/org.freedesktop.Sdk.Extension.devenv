@@ -1232,10 +1232,10 @@ modules:
     config-opts:
       - --disable-shared
       - --disable-docs
-      - --disable-unix-transport
+      - --enable-unix-transport # TODO: test if needed for sway/wlroots
       - --disable-tcp-transport
       - --disable-ipv6
-      - --disable-local-transport
+      - --enable-local-transport # TODO: test if needed for sway/wlroots
     sources:
       - type: archive
         url: https://xorg.freedesktop.org/releases/individual/lib/libXmu-1.1.3.tar.bz2
@@ -1297,10 +1297,10 @@ modules:
         config-opts:
           - --disable-shared
           - --disable-specs
-          - --disable-unix-transport
+          - --enable-unix-transport # TODO: test if needed for sway/wlroots
           - --disable-tcp-transport
           - --disable-ipv6
-          - --disable-local-transport
+          - --enable-local-transport # TODO: test if needed for sway/wlroots
           - --disable-xf86bigfont
         sources:
           - type: archive
@@ -1324,20 +1324,20 @@ modules:
               - --disable-composite
               - --disable-damage
               - --disable-dpms
-              - --disable-dri2
-              - --disable-dri3
-              - --disable-glx
-              - --disable-present
+              - --enable-dri2 # needed for mesa
+              - --enable-dri3 # needed for mesa
+              - --enable-glx # needed for mesa
+              - --enable-present # needed for wlroots
               - --disable-randr
               - --disable-record
-              - --disable-render
+              - --enable-render # needed for mesa
               - --disable-resource
               - --disable-screensaver
-              - --disable-shape
-              - --disable-shm
+              - --enable-shape # needed for mesa
+              - --enable-shm # needed for wlroots
               - --disable-sync
               - --disable-xevie
-              - --disable-xfixes
+              - --enable-xfixes # needed for mesa
               - --disable-xfree86-dri
               - --disable-xinerama
               - --disable-xtest
@@ -1402,6 +1402,22 @@ modules:
                       url-template: https://xorg.freedesktop.org/archive/individual/proto/xcb-proto-$version.tar.gz
                 cleanup:
                   - '*'
+          - name: xcb-util-renderutil-static # needed for wlroots
+            build-options: *musl-static-build-options
+            config-opts:
+              - --disable-shared
+              - --disable-devel-docs
+            sources:
+              - type: archive
+                url: https://xcb.freedesktop.org/dist/xcb-util-renderutil-0.3.9.tar.gz
+                sha256: 55eee797e3214fe39d0f3f4d9448cc53cffe06706d108824ea37bb79fcedcad5
+                x-checker-data:
+                  type: anitya
+                  project-id: 5169
+                  stable-only: true
+                  url-template: https://xcb.freedesktop.org/dist/xcb-util-renderutil-$version.tar.gz
+            cleanup:
+              - '*'
       - name: libxext-static
         build-options: *musl-static-build-options
         config-opts:
@@ -1443,10 +1459,10 @@ modules:
             config-opts:
               - --disable-shared
               - --disable-docs
-              - --disable-unix-transport
+              - --enable-unix-transport # TODO: test if needed for sway/wlroots
               - --disable-tcp-transport
               - --disable-ipv6
-              - --disable-local-transport
+              - --enable-local-transport # TODO: test if needed for sway/wlroots
               - --without-libuuid
             sources:
               - type: archive
@@ -1475,6 +1491,482 @@ modules:
                   url-template: https://www.x.org/releases/individual/lib/libICE-$version.tar.gz
                 cleanup:
                   - '*'
+
+  - name: libxfixes-static # meeded for mesa wlroots
+    build-options: *musl-static-build-options
+    config-opts:
+      - --disable-shared
+    sources:
+      - type: archive
+        url: https://www.x.org/releases/individual/lib/libXfixes-6.0.0.tar.gz
+        sha256: 82045da5625350838390c9440598b90d69c882c324ca92f73af9f0e992cb57c7
+        x-checker-data:
+          type: anitya
+          project-id: 1792
+          stable-only: true
+          url-template: https://www.x.org/releases/individual/lib/libXfixes-$version.tar.gz
+    cleanup:
+      - '*'
+
+  - name: libxshmfence-static # meeded for mesa wlroots
+    build-options: *musl-static-build-options
+    config-opts:
+      - --disable-shared
+    sources:
+      - type: archive
+        url: https://www.x.org/releases/individual/lib/libxshmfence-1.3.tar.gz
+        sha256: 7eb3d46ad91bab444f121d475b11b39273142d090f7e9ac43e6a87f4ff5f902c
+        x-checker-data:
+          type: anitya
+          project-id: 1792
+          stable-only: true
+          url-template: https://www.x.org/releases/individual/lib/libxshmfence-$version.tar.gz
+    cleanup:
+      - '*'
+
+  - name: libxxf86vm-static # meeded for mesa
+    build-options: *musl-static-build-options
+    config-opts:
+      - --disable-shared
+    sources:
+      - type: archive
+        url: https://www.x.org/releases/individual/lib/libXxf86vm-1.1.4.tar.gz
+        sha256: 5108553c378a25688dcb57dca383664c36e293d60b1505815f67980ba9318a99
+        x-checker-data:
+          type: anitya
+          project-id: 1799
+          stable-only: true
+          url-template: https://www.x.org/releases/individual/lib/libXxf86vm-$version.tar.gz
+    cleanup:
+      - '*'
+
+  - name: xorg-xhost-static
+    build-options: *musl-static-build-options
+    make-args:
+      - LIBS+=-lxcb -lXdmcp -lXau
+    sources:
+      - type: archive
+        url: https://www.x.org/releases/individual/app/xhost-1.0.8.tar.gz
+        sha256: e5aabce1533dc778ceb5bbc207105cf3770f710629caceaad64675b00c38c3f8
+        x-checker-data:
+          type: anitya
+          project-id: 15021
+          stable-only: true
+          url-template: https://www.x.org/releases/individual/app/xhost-$version.tar.gz
+
+  - name: mesa-static
+   #build-options: *musl-static-build-options
+   # TODO: drop module specific build options
+    build-options:
+      cflags: -static -static-pie -fPIC -I/usr/lib/sdk/devenv/include/libdrm
+      cxxflags: -static -static-pie -fPIC
+      ldflags: -static -static-pie -fPIC -Wl,-fuse-ld=mold -Wl,-lncursesw,-lXau,-lXdmcp
+      env: *musl-toolchain-environment
+      prepend-path: /usr/lib/sdk/llvm-musl/bin
+      prepend-ld-library-path: /usr/lib/sdk/llvm-musl/lib
+    buildsystem: meson
+    config-opts:
+      # TODO: maybe enable dri3
+      - --default-library=static
+      - --prefer-static
+      - -Dcpp_rtti=false
+      - -Dplatforms=x11,wayland
+     #- -Degl-native-platform=x11,wayland,surfaceless,drm
+      - -Ddri3=disabled
+     #- -Ddri-drivers-path=
+     #- -Ddri-search-path=
+      - -Dgallium-drivers=swrast
+      - -Dgallium-extra-hud=false
+      - -Dgallium-vdpau=disabled
+     #- -Dvdpau-libs-path=
+      - -Dgallium-xvmc=disabled
+     #- -Dxvmc-libs-path=
+      - -Dgallium-omx=disabled
+      - -Dgallium-va=disabled
+     #- -Dva-libs-path=
+      - -Dgallium-xa=disabled
+     #- -Dgallium-nine=disabled
+     #- -Dgallium-d3d10umd=disabled
+     #- -Dgallium-opencl=disabled
+     #- -Dopencl-spirv=disabled
+      - -Dopencl-native=false
+     #- -Dstatic-libclc=
+     #- -Dd3d-drivers-path=
+      - -Dvulkan-drivers=
+     #- -Dfreedreno-kgsl=false
+     #- -Dfreedreno-virtio=false
+     #- -Dimagination-srv=false
+     #- -Dshader-cache=auto
+     #- -Dshader-cache-default=true
+     #- -Dshader-cache-max-size=
+     #- -Dvulkan-icd-dir=
+     #- -Dvulkan-layers=
+      - -Dshared-glapi=disabled
+      - -Dgles1=disabled
+      - -Dgles2=enabled
+      - -Dopengl=true
+      - -Dgbm=enabled
+     #- -Dgbm-backends-path=
+      - -Dglx=dri
+      - -Degl=enabled
+      - -Dglvnd=false
+      - -Dllvm=disabled
+      - -Dshared-llvm=disabled
+     #- -Ddraw-use-llvm=true
+      - -Dvalgrind=disabled
+      - -Dlibunwind=disabled
+      - -Dlmsensors=disabled
+      - -Dbuild-tests=false
+     #- -Dbuild-aco-tests=false
+     #- -Dinstall-intel-gpu-tests=false
+     #- -Dselinux=false
+     #- -Dexecmem=true
+      - -Dosmesa=false
+     #- -Dosmesa-bits=8
+      - -Dtools=
+      - -Dxlib-lease=disabled
+     #- -Dglx-direct=true
+     #- -Degl-lib-suffix
+     #- -Dgles-lib-suffix
+     #- -Dzstd=auto
+     #- -Dzlib=enabled
+     #- -Dsse2=true
+     #- -Dperfetto=false
+     #- -Ddatasources=auto
+     #- -Dcustom-shader-replacement=
+     #- -Dvulkan-beta=false
+     #- -Dintel-clc=disabled
+    post-install:
+      - rm -f ${FLATPAK_DEST}/lib/dri/kms_swrast_dri.a
+      - mv ${FLATPAK_DEST}/lib/libEGL{,-generic}.a
+      - mv ${FLATPAK_DEST}/lib/{dri/swrast_dri,libEGL}.a
+    sources:
+      - type: archive
+        url: https://archive.mesa3d.org//mesa-22.1.7.tar.xz
+        sha256: da838eb2cf11d0e08d0e9944f6bd4d96987fdc59ea2856f8c70a31a82b355d89
+        x-checker-data:
+          type: anitya
+          project-id: 1970
+          stable-only: true
+          url-template: https://archive.mesa3d.org//mesa-$version.tar.xz
+      - type: shell
+        commands:
+          # TODO: use single patch
+          - sed -i 's/shared_library/static_library/' src/{egl,gbm,glx,gallium/targets/dri}/meson.build
+          - sed -i '/^libegl =/,/^)$/{ /soversion/d;/version/d;/vs_module_defs/d }' src/egl/meson.build
+          - sed -i '/link_for_egl/ s/libglapi/libglapi_static/' src/egl/meson.build
+          - sed -i '/^libgbm =/,/^)$/{ /version/d }' src/gbm/meson.build
+          - sed -i '/elif not with_shared_glapi/d;/EGL requires shared-glapi/d' meson.build
+          - sed -i 's/\.so/.a/g' src/gallium/targets/dri/meson.build
+          - sed -i '/^libgallium_dri =/,/^)$/{ /name_suffix/ s/so/a/ }' src/gallium/targets/dri/meson.build
+          - sed -i '/while ext/ s/\.so/.a/' bin/install_megadrivers.py
+          - sed -i '/^if not with_shared_glapi/,/^endif$/d' meson.build
+          - sed -i '/^libgles2 =/,/^)$/{ s/shared_library/static_library/;/version/d }' src/mapi/es2api/meson.build
+          - sed -i '/^libmesa =/,/^)$/{ /build_by_default/ s/false/true/ }' src/mesa/meson.build
+          - |
+            sed -i '/^libmesa =/,/^)$/{ s/build_by_default.*/& \n  install : true,/ }' src/mesa/meson.build
+          - sed -i '/dri based GLX requires/ s/error/message/' meson.build
+          - sed -i '/^libgl =/,/^)$/{ /version/d }' src/glx/meson.build
+    cleanup:
+      - '*'
+    modules:
+      - name: eudev-static
+        # TODO: maybe move up
+        build-options: *musl-static-build-options
+        config-opts:
+          - --disable-shared
+          - --disable-programs
+          - --disable-blkid
+          - --disable-selinux
+          - --disable-manpages
+          - --disable-kmod
+          - --disable-mtd_probe
+        sources:
+          - type: archive
+            url: https://github.com/eudev-project/eudev/releases/download/v3.2.11/eudev-3.2.11.tar.gz
+            sha256: 19847cafec67897da855fde56f9dc7d92e21c50e450aa79068a7e704ed44558b
+            x-checker-data:
+              type: anitya
+              project-id: 13466
+              stable-only: true
+              url-template: https://github.com/eudev-project/eudev/releases/download/v$version/eudev-$version.tar.gz
+        cleanup:
+          - '*'
+      - name: libdrm-static
+        build-options: *musl-static-build-options
+        buildsystem: meson
+        config-opts:
+          - --default-library=static
+          - -Dintel=false
+          - -Dradeon=false
+          - -Damdgpu=false
+          - -Dnouveau=false
+          - -Dvmwgfx=false
+          - -Domap=false
+          - -Dexynos=false
+          - -Dfreedreno=false
+          - -Dtegra=false
+          - -Dvc4=false
+          - -Detnaviv=false
+          - -Dcairo-tests=false
+          - -Dman-pages=false
+          - -Dvalgrind=false
+          - -Dfreedreno-kgsl=false
+          - -Dinstall-test-programs=false
+          - -Dudev=false
+        sources:
+          - type: archive
+            url: https://dri.freedesktop.org/libdrm/libdrm-2.4.112.tar.xz
+            sha256: 00b07710bd09b35cd8d80eaf4f4497fe27f4becf467a9830f1f5e8324f8420ff
+            x-checker-data:
+              type: anitya
+              project-id: 1596
+              stable-only: true
+              url-template: https://dri.freedesktop.org/libdrm/libdrm-$version.tar.xz
+        cleanup:
+          - '*'
+
+  - name: wlroots-static
+    # TODO: evaluate need of seatd or polkit
+    # TODO: possibly add depends xcb-util-errors xcb-util-wm xorg-xwayland glslang
+    build-options: *musl-static-build-options
+    buildsystem: meson
+    config-opts:
+      - --default-library=static
+      - --auto-features=disabled
+      - --libdir=lib
+      - -Dxcb-errors=disabled
+      - -Dxwayland=disabled
+      - -Dexamples=false
+      - -Drenderers=gles2
+      - -Dbackends=drm,libinput,x11
+     #- -Dallocators=gbm
+      - -Dwerror=false
+    sources:
+      - type: archive
+        url: https://gitlab.freedesktop.org/wlroots/wlroots/-/archive/0.15.1/wlroots-0.15.1.tar.gz
+        sha256: 5b92f11a52d978919ed1306e0d54c9d59f1762b28d44f0a2da3ef3b351305373
+        x-checker-data:
+          type: anitya
+          project-id: 18357
+          stable-only: true
+          url-template: https://gitlab.freedesktop.org/wlroots/wlroots/-/archive/$version/wlroots-$version.tar.gz
+    cleanup:
+      - '*'
+    modules:
+      - name: seatd-static
+        build-options: *musl-static-build-options
+        buildsystem: meson
+        config-opts:
+          - --default-library=static
+          - -Dlibseat-logind=disabled
+          - -Dlibseat-seatd=enabled
+          - -Dlibseat-builtin=disabled
+          - -Dserver=disabled
+          - -Dexamples=disabled
+          - -Dman-pages=disabled
+        sources:
+          - type: archive
+            url: https://git.sr.ht/~kennylevinsen/seatd/archive/0.7.0.tar.gz
+            sha256: 210ddf8efa1149cde4dd35908bef8e9e63c2edaa0cdb5435f2e6db277fafff3c
+            x-checker-data:
+              type: anitya
+              project-id: 234932
+              stable-only: true
+              url-template: https://git.sr.ht/~kennylevinsen/seatd/archive/$version.tar.gz
+        cleanup:
+          - '*'
+      - name: libxkbcommon-static
+        build-options: *musl-static-build-options
+        buildsystem: meson
+        config-opts:
+          - --default-library=static
+         #- -Dxkb-config-root=
+         #- -Dxkb-config-extra-path=
+         #- -Dx-locale-root=
+         #- -Ddefault-rules=
+         #- -Ddefault-model=
+         #- -Ddefault-layout=
+         #- -Ddefault-variant=
+         #- -Ddefault-options=
+          - -Denable-tools=false
+          # TODO: enable x11
+          - -Denable-x11=false
+          - -Denable-docs=false
+          - -Denable-wayland=true
+          - -Denable-xkbregistry=false
+        sources:
+          - type: archive
+            url: https://xkbcommon.org/download/libxkbcommon-1.4.1.tar.xz
+            sha256: 943c07a1e2198026d8102b17270a1f406e4d3d6bbc4ae105b9e1b82d7d136b39
+            x-checker-data:
+              type: anitya
+              project-id: 1780
+              stable-only: true
+              url-template: https://xkbcommon.org/download/libxkbcommon-$version.tar.xz
+        cleanup:
+          - '*'
+      - name: libinput-static
+        build-options: *musl-static-build-options
+        buildsystem: meson
+        config-opts:
+          - --default-library=static
+          - --libexec=lib
+          - -Dlibwacom=false
+          - -Ddebug-gui=false
+          - -Dtests=false
+          - -Ddocumentation=false
+          - -Dzshcompletiondir=no
+        sources:
+          - type: archive
+            url: https://gitlab.freedesktop.org/libinput/libinput/-/archive/1.21.0/libinput-1.21.0.tar.gz
+            sha256: 1b23c180f5b297303ed36f5a549910f5d320b0eb21052eac67a966d4eaa4e01d
+            x-checker-data:
+              type: anitya
+              project-id: 5781
+              stable-only: true
+              url-template: https://gitlab.freedesktop.org/libinput/libinput/-/archive/$version/libinput-$version.tar.gz
+          - type: shell
+            commands:
+              - sed -i 's/shared_library/static_library/' meson.build
+              - sed -i '/^lib_libinput =/,/^)$/{ /version/d }' meson.build
+        cleanup:
+          - '*'
+        modules:
+          - name: libevdev-static
+            build-options: *musl-static-build-options
+            buildsystem: meson
+            config-opts:
+              - --default-library=static
+              - -Dtests=disabled
+              - -Ddocumentation=disabled
+            sources:
+              - type: archive
+                url: https://freedesktop.org/software/libevdev/libevdev-1.12.0.tar.xz
+                sha256: 2f729e3480695791f9482e8388bd723402b89f0eaf118057bbdea3cecee9b237
+                x-checker-data:
+                  type: anitya
+                  project-id: 20540
+                  stable-only: true
+                  url-template: https://freedesktop.org/software/libevdev/libevdev-$version.tar.xz
+            cleanup:
+              - '*'
+          - name: mtdev-static
+            build-options: *musl-static-build-options
+            config-opts:
+              - --disable-shared
+            sources:
+              - type: archive
+                url: https://bitmath.org/code/mtdev/mtdev-1.1.6.tar.bz2
+                sha256: 15d7b28da8ac71d8bc8c9287c2045fd174267bc740bec10cfda332dc1204e0e0
+                x-checker-data:
+                  type: anitya
+                  project-id: 8868
+                  stable-only: true
+                  url-template: https://bitmath.org/code/mtdev/mtdev-$version.tar.bz2
+            cleanup:
+              - '*'
+
+  - name: sway-static
+    # TODO: add setconf?
+    #build-options: *musl-static-build-options
+    # TODO: avoid in-module  build options
+    build-options:
+      cflags: -static -static-pie -fPIC
+      cxxflags: -static -static-pie -fPIC
+      ldflags: -static -static-pie -fPIC -Wl,-fuse-ld=mold -Wl,--allow-multiple-definition -Wl,-lEGL,-lEGL-generic,-lEGL,-lstdc++,-lXau,-lXdmcp,-lGL,-lXext,-lmesa,-lXxf86vm,-lxcb-glx,-lXfixes
+      env: *musl-toolchain-environment
+    buildsystem: meson
+    config-opts:
+      - --default-library=static
+      - --auto-features=disabled
+      - -Dwerror=false
+      - -Ddefault-wallpaper=false
+      - -Dzsh-completions=false
+      - -Dbash-completions=false
+      - -Dfish-completions=false
+      - -Dswaybar=false
+      - -Dswaynag=false
+      - -Dxwayland=disabled
+      - -Dtray=disabled
+      - -Dgdk-pixbuf=enabled
+      - -Dman-pages=disabled
+      - -Dsd-bus-provider=auto
+    sources:
+      - type: archive
+        url: https://github.com/swaywm/sway/archive/1.7/sway-1.7.tar.gz
+        sha256: 0c64536fb2883ec518e75cfb119f9300115fb49b084e3fde62b794fe2c6c8d84
+        x-checker-data:
+           type: anitya
+           project-id: 11497
+           stable-only: true
+           url-template: https://github.com/swaywm/sway/archive/$version/sway-$version.tar.gz
+    modules:
+      - name: json-c-static
+        build-options: *musl-static-build-options
+        buildsystem: cmake
+        config-opts:
+          - -DCMAKE_BUILD_TYPE=None
+          - -DBUILD_SHARED_LIBS=OFF
+          - -DBUILD_STATIC_LIBS=ON
+          - -DBUILD_TESTING=OFF
+          - -DENABLE_THREADING=ON
+          - -DENABLE_RDRAND=OFF
+        sources:
+          - type: archive
+            url: https://s3.amazonaws.com/json-c_releases/releases/json-c-0.15.tar.gz
+            sha256: b8d80a1ddb718b3ba7492916237bbf86609e9709fb007e7f7d4322f02341a4c6
+            x-checker-data:
+              type: anitya
+              project-id: 1477
+              stable-only: true
+              url-template: https://s3.amazonaws.com/json-c_releases/releases/json-c-$version.tar.gz
+        cleanup:
+          - '*'
+
+  - name: cage-static
+    #build-options: *musl-static-build-options
+    # TODO: avoid in-module  build options
+    build-options:
+      cflags: -static -static-pie -fPIC
+      cxxflags: -static -static-pie -fPIC
+      ldflags: -static -static-pie -fPIC -Wl,-fuse-ld=mold -Wl,--allow-multiple-definition -Wl,-lEGL,-lEGL-generic,-lEGL,-lstdc++,-lXau,-lXdmcp,-lGL,-lXext,-lmesa,-lXxf86vm,-lxcb-glx,-lXfixes
+      env: *musl-toolchain-environment
+    buildsystem: meson
+    config-opts:
+      - --default-library=static
+      - -Dman-pages=disabled
+      - -Dxwayland=false
+    sources:
+      - type: archive
+        url: https://github.com/Hjdskes/cage/archive/a81ab701d73d0f43c9bb9747e5fdf3c5e226139c/cage-a81ab701d73d0f43c9bb9747e5fdf3c5e226139c.tar.gz
+        sha256: 1e5340f2b8ed283f3c4dd9e1cf9a7402b6b7fb4472ddcdb2de1147315e0fcf19
+        x-checker-data:
+           type: anitya
+           project-id: 21171
+           stable-only: true
+           version:
+             '>': 0.1.4
+           url-template: https://github.com/Hjdskes/cage/releases/download/v$version/cage-$version.tar.gz
+    modules:
+      - name: scdoc
+        no-autogen: true
+        make-args:
+          - PREFIX=${FLATPAK_DEST}
+        make-install-args:
+          - PREFIX=${FLATPAK_DEST}
+          - PCDIR=${PREFIX}/lib/pkgconfig
+        sources:
+          - type: archive
+            url: https://git.sr.ht/~sircmpwn/scdoc/archive/1.11.2.tar.gz
+            sha256: e9ff9981b5854301789a6778ee64ef1f6d1e5f4829a9dd3e58a9a63eacc2e6f0
+            x-checker-data:
+              type: anitya
+              project-id: 68662
+              stable-only: true
+              url-template: https://git.sr.ht/~sircmpwn/scdoc/archive/$version.tar.gz
+        cleanup:
+          - '*'
 
 
   ############################
