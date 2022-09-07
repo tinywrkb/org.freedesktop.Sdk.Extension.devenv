@@ -5464,6 +5464,9 @@ modules:
       - -Dgrapheme-clustering=enabled
       - -Dtests=false
       - -Dterminfo=enabled
+    post-install:
+      - install -Dm755 ../foot-x11 -t ${FLATPAK_DEST}/bin/
+      - ln -s foot-x11 ${FLATPAK_DEST}/bin/xfoot
     sources:
       - type: archive
         url: https://codeberg.org/dnkl/foot/archive/1.13.1.tar.gz
@@ -5473,6 +5476,14 @@ modules:
           project-id: 141611
           stable-only: true
           url-template: https://codeberg.org/dnkl/foot/archive/$version.tar.gz
+      - type: script
+        dest-filename: foot-x11
+        commands:
+          - |
+            unset WAYLAND_DISPLAY
+            export LIBGL_ALWAYS_SOFTWARE=1 __GLX_VENDOR_LIBRARY_NAME=mesa
+            export XCURSOR_THEME=${XCURSOR_THEME:-Adwaita}
+            exec cage -- foot "$@"
     modules:
       - name: ncurses-progs-static # foot terminfo generation doesn't work with runtime's tic
         # TODO: try patching foot buildsystem instead of this
@@ -5683,7 +5694,8 @@ modules:
           - |
             if [ -z "$FLATPAK_DEVELOPMENT_ENVIRONMENT" ]; then
               source /usr/lib/sdk/devenv/enable.sh
-              exec bash -i
+              # workaround for not running as login shell
+              SHELL=$(which bash) exec bash -i
             fi
       - type: script
         dest-filename: ssh
