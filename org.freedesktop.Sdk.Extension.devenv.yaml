@@ -5468,114 +5468,72 @@ modules:
           stable-only: true
           url-template: https://ftp.gnu.org/pub/gnu/ncurses/ncurses-$version.tar.gz
 
-# - name: foot-static
-#   # TODO: add notify-send
-#   build-options: *musl-static-build-options
-#   buildsystem: meson
-#   config-opts:
-#     - --default-library=static
-#     - -Ddocs=enabled
-#     - -Dthemes=true
-#     - -Dime=true
-#     - -Dgrapheme-clustering=enabled
-#     - -Dtests=false
-#   sources:
-#     - type: archive
-#       url: https://codeberg.org/dnkl/foot/archive/1.13.0.tar.gz
-#       sha256: 9fd10584d40f6aac6b87c11a94e1fdfc4bac43aef9144f4aa84213257672da8c
-#       x-checker-data:
-#         type: anitya
-#         project-id: 141611
-#         stable-only: true
-#         url-template: https://codeberg.org/dnkl/foot/archive/$version.tar.gz
-#   modules:
-#     - name: fcft-static
-#       build-options: *musl-static-build-options
-#       buildsystem: meson
-#       config-opts:
-#         - --default-library=static
-#       sources:
-#         - type: archive
-#           url: https://codeberg.org/dnkl/fcft/archive/3.1.2.tar.gz
-#           sha256: f571afe693d3fa11fe36e97c7a2ecbbf9313755ee31c1ec3dcc648796b8e6db0
-#           x-checker-data:
-#             type: anitya
-#             project-id: 143240
-#             stable-only: true
-#             url-template: https://codeberg.org/dnkl/fcft/archive/$version.tar.gz
-#       cleanup:
-#         - '*'
-#       modules:
-#         - name: tllist
-#           buildsystem: meson
-#           sources:
-#             - type: archive
-#               url: https://codeberg.org/dnkl/tllist/archive/1.1.0.tar.gz
-#               sha256: 0e7b7094a02550dd80b7243bcffc3671550b0f1d8ba625e4dff52517827d5d23
-#               x-checker-data:
-#                 type: anitya
-#                 project-id: 141661
-#                 stable-only: true
-#                 url-template: https://codeberg.org/dnkl/tllist/archive/$version.tar.gz
-#           cleanup:
-#             - '*'
-#     - name: libutf8proc-static
-#       build-options: *musl-static-build-options
-#       buildsystem: cmake
-#       builddir: true
-#       sources:
-#         - type: archive
-#           url: https://github.com/JuliaStrings/utf8proc/archive/v2.7.0/utf8proc-2.7.0.tar.gz
-#           sha256: 4bb121e297293c0fd55f08f83afab6d35d48f0af4ecc07523ad8ec99aa2b12a1
-#           x-checker-data:
-#             type: anitya
-#             project-id: 7455
-#             stable-only: true
-#             url-template: https://github.com/JuliaStrings/utf8proc/archive/v$version/utf8proc-$version.tar.gz
-#       cleanup:
-#         - '*'
-#     - name: libxkbcommon-static
-#       build-options: *musl-static-build-options
-#       buildsystem: meson
-#       config-opts:
-#         - --default-library=static
-#         - -Dxkb-config-root=/usr/share/X11/xkb
-#         - -Dxkb-config-extra-path=/etc/xkb
-#         - -Dx-locale-root=/usr/share/X11/locale
-#         - -Denable-tools=false
-#         - -Denable-x11=false
-#         - -Denable-docs=false
-#         - -Denable-wayland=true
-#         - -Denable-xkbregistry=false
-#       sources:
-#         - type: archive
-#           url: https://xkbcommon.org/download/libxkbcommon-1.4.1.tar.xz
-#           sha256: 943c07a1e2198026d8102b17270a1f406e4d3d6bbc4ae105b9e1b82d7d136b39
-#           x-checker-data:
-#             type: anitya
-#             project-id: 1780
-#             stable-only: true
-#             url-template: https://xkbcommon.org/download/libxkbcommon-$version.tar.xz
-#       cleanup:
-#         - '*'
-#     - name: scdoc
-#       no-autogen: true
-#       make-args:
-#         - PREFIX=${FLATPAK_DEST}
-#       make-install-args:
-#         - PREFIX=${FLATPAK_DEST}
-#         - PCDIR=${PREFIX}/lib/pkgconfig
-#       sources:
-#         - type: archive
-#           url: https://git.sr.ht/~sircmpwn/scdoc/archive/1.11.2.tar.gz
-#           sha256: e9ff9981b5854301789a6778ee64ef1f6d1e5f4829a9dd3e58a9a63eacc2e6f0
-#           x-checker-data:
-#             type: anitya
-#             project-id: 68662
-#             stable-only: true
-#             url-template: https://git.sr.ht/~sircmpwn/scdoc/archive/$version.tar.gz
-#       cleanup:
-#         - '*'
+  - name: foot-static
+    # TODO: add notify-send
+    build-options: *musl-static-build-options
+    buildsystem: meson
+    config-opts:
+      - --default-library=static
+      - -Ddocs=enabled
+      - -Dthemes=true
+      - -Dime=true
+      - -Dgrapheme-clustering=enabled
+      - -Dtests=false
+    sources:
+      - type: archive
+        url: https://codeberg.org/dnkl/foot/archive/1.13.0.tar.gz
+        sha256: 9fd10584d40f6aac6b87c11a94e1fdfc4bac43aef9144f4aa84213257672da8c
+        x-checker-data:
+          type: anitya
+          project-id: 141611
+          stable-only: true
+          url-template: https://codeberg.org/dnkl/foot/archive/$version.tar.gz
+    modules:
+      - name: fcft-static
+        build-options: *musl-static-build-options
+        buildsystem: meson
+        config-opts:
+          - --default-library=static
+        sources:
+          - type: archive
+            url: https://codeberg.org/dnkl/fcft/archive/3.1.2.tar.gz
+            sha256: f571afe693d3fa11fe36e97c7a2ecbbf9313755ee31c1ec3dcc648796b8e6db0
+            x-checker-data:
+              type: anitya
+              project-id: 143240
+              stable-only: true
+              url-template: https://codeberg.org/dnkl/fcft/archive/$version.tar.gz
+        cleanup:
+          - '*'
+        modules:
+          - name: tllist
+            buildsystem: meson
+            sources:
+              - type: archive
+                url: https://codeberg.org/dnkl/tllist/archive/1.1.0.tar.gz
+                sha256: 0e7b7094a02550dd80b7243bcffc3671550b0f1d8ba625e4dff52517827d5d23
+                x-checker-data:
+                  type: anitya
+                  project-id: 141661
+                  stable-only: true
+                  url-template: https://codeberg.org/dnkl/tllist/archive/$version.tar.gz
+            cleanup:
+              - '*'
+      - name: libutf8proc-static
+        build-options: *musl-static-build-options
+        buildsystem: cmake
+        builddir: true
+        sources:
+          - type: archive
+            url: https://github.com/JuliaStrings/utf8proc/archive/v2.7.0/utf8proc-2.7.0.tar.gz
+            sha256: 4bb121e297293c0fd55f08f83afab6d35d48f0af4ecc07523ad8ec99aa2b12a1
+            x-checker-data:
+              type: anitya
+              project-id: 7455
+              stable-only: true
+              url-template: https://github.com/JuliaStrings/utf8proc/archive/v$version/utf8proc-$version.tar.gz
+        cleanup:
+          - '*'
 
   - name: picocom-static
     build-options: *musl-static-build-options
