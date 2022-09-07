@@ -5454,6 +5454,7 @@ modules:
 
   - name: foot-static
     # TODO: add notify-send
+    # TODO: investigate coredumps on exit (both wayland and x11)
     build-options: *musl-static-build-options
     buildsystem: meson
     config-opts:
@@ -5465,8 +5466,11 @@ modules:
       - -Dtests=false
       - -Dterminfo=enabled
     post-install:
+      - mv ${FLATPAK_DEST}/bin/foot{,.bin}
+      - install -Dm755 ../foot-wrapper ${FLATPAK_DEST}/bin/foot
       - install -Dm755 ../foot-x11 -t ${FLATPAK_DEST}/bin/
       - ln -s foot-x11 ${FLATPAK_DEST}/bin/xfoot
+      - ln -s foot.bin ${FLATPAK_DEST}/bin/foot-wayland
     sources:
       - type: archive
         url: https://codeberg.org/dnkl/foot/archive/1.13.1.tar.gz
@@ -5484,7 +5488,31 @@ modules:
             export LIBGL_ALWAYS_SOFTWARE=1 __GLX_VENDOR_LIBRARY_NAME=mesa
             export WLR_RENDERER=pixman
             export XCURSOR_THEME=${XCURSOR_THEME:-Adwaita}
-            exec cage -- foot "$@"
+            exec cage -- foot.bin "$@"
+      - type: script
+        dest-filename: foot-wrapper
+        commands:
+          - |
+            if [ -r "/.flatpak-info" ]; then
+              if [ -n "$DEVENV_FOOT_PREFER_SANDBOX" ]; then
+                if [[ $(egrep '^sockets=' /.flatpak-info) == *wayland* ]]; then
+                  exec foot-wayland "$@"
+                else
+                  exec foot-x11 "$@"
+                fi
+              elif flatpak-spawn --host /usr/bin/foot --version &>/dev/null; then
+                flatpak-spawn --host \
+                  systemd-run --user --slice=app.slice --service-type=exec --quiet --no-block --collect \
+                  /usr/bin/foot --log-level=none "$@"
+              else
+                export DEVENV_FOOT_PREFER_SANDBOX=1
+                exec "$0"
+              fi
+            elif [ -z "$WAYLAND_DISPLAY" ]; then
+                exec foot-x11 "$@"
+            else
+              exec foot-wayland "$@"
+            fi
     modules:
       - name: ncurses-progs-static # foot terminfo generation doesn't work with runtime's tic
         # TODO: try patching foot buildsystem instead of this
