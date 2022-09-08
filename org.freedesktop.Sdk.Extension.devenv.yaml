@@ -1870,13 +1870,13 @@ modules:
       - -Dxwayland=false
     sources:
       - type: archive
-        url: https://github.com/Hjdskes/cage/releases/download/v0.1.4/cage-0.1.4.tar.gz
-        sha256: dfe27fb0c7d43db72d6c82f01e2736580a0791a23ba69d7b56285d08af98ad90
+        url: https://github.com/Hjdskes/cage/archive/a81ab701d73d0f43c9bb9747e5fdf3c5e226139c/cage-a81ab701d73d0f43c9bb9747e5fdf3c5e226139c.tar.gz
+        sha256: 1e5340f2b8ed283f3c4dd9e1cf9a7402b6b7fb4472ddcdb2de1147315e0fcf19
         x-checker-data:
           type: anitya
           project-id: 21171
           stable-only: true
-          version:
+          versions:
             '>': 0.1.4
           url-template: https://github.com/Hjdskes/cage/releases/download/v$version/cage-$version.tar.gz
     modules:
