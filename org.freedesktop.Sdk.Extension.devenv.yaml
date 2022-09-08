@@ -1906,14 +1906,26 @@ modules:
 
   - name: python
     # TODO: build missing modules
+    # TODO: figure if musl-shared-build-options can be used
    #build-options: *musl-shared-build-options
     build-options:
       # TODO: maybe set rpath for shared libs
-      cflags: -fPIC -Bstatic -Wl,--dynamic-linker=/usr/lib/sdk/devenv/lib/libc.musl-x86_64.so.1
-      cxxflags: -fPIC -Bstatic -Wl,--dynamic-linker=/usr/lib/sdk/devenv/lib/libc.musl-x86_64.so.1
+      cflags:
+        -O2 -g -pipe -Wp,-D_FORTIFY_SOURCE=2 -Wp,-D_GLIBCXX_ASSERTIONS -fexceptions -fstack-protector-strong
+        -grecord-gcc-switches -fasynchronous-unwind-tables -fstack-clash-protection -fcf-protection -fno-omit-frame-pointer
+        -I/usr/lib/sdk/devenv/include -fPIC -Bstatic -Wl,--dynamic-linker=/usr/lib/sdk/devenv/lib/libc.musl-x86_64.so.1
+      cflags-override: true
+      cxxflags:
+        -O2 -g -pipe -Wp,-D_FORTIFY_SOURCE=2 -Wp,-D_GLIBCXX_ASSERTIONS -fexceptions -fstack-protector-strong
+        -grecord-gcc-switches -fasynchronous-unwind-tables -fstack-clash-protection -fcf-protection -fno-omit-frame-pointer
+        -I/usr/lib/sdk/devenv/include -fPIC -Bstatic -Wl,--dynamic-linker=/usr/lib/sdk/devenv/lib/libc.musl-x86_64.so.1
+      cxxflags-override: true
+     #cppflags:
+     #cppflags-override: true
       # TODO: try getting mold to work
-     #ldflags: -fPIC -Bstatic -Wl,--dynamic-linker=/usr/lib/sdk/devenv/lib/libc.musl-x86_64.so.1 -Wl,-fuse-ld=mold
-      ldflags: -fPIC -Bstatic -Wl,--dynamic-linker=/usr/lib/sdk/devenv/lib/libc.musl-x86_64.so.1
+     #ldflags: -L/usr/lib/sdk/devenv/lib -Wl,-z,relro,-z,now -Wl,--as-needed -fPIC -Wl,-fuse-ld=mold -Bstatic -Wl,--dynamic-linker=/usr/lib/sdk/devenv/lib/libc.musl-x86_64.so.1
+      ldflags: -L/usr/lib/sdk/devenv/lib -Wl,-z,relro,-z,now -Wl,--as-needed -fPIC -Bstatic -Wl,--dynamic-linker=/usr/lib/sdk/devenv/lib/libc.musl-x86_64.so.1
+      ldflags-override: true
       prefix: /usr/lib/sdk/devenv/python
       libdir: /usr/lib/sdk/devenv/python/lib
       prepend-path: /usr/lib/sdk/devenv/python/bin
