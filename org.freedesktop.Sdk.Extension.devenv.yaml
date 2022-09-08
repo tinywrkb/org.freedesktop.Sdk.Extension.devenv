@@ -167,6 +167,7 @@ modules:
   ############################
 
 # - name: meson
+#   # NOTE: modules that need this would likely have to set PYTHONPATH to ${FLATPAK_DEST}/python$(python -c 'import sys; print("%s%s" %sys.version_info[0:2])')/site-packages
 #   buildsystem: simple
 #   build-commands:
 #     - python setup.py build
