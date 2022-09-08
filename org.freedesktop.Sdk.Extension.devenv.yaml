@@ -1555,8 +1555,9 @@ modules:
           url-template: https://www.x.org/releases/individual/app/xhost-$version.tar.gz
 
   - name: mesa-static
+    # TODO: try dropping after cage updates for wlroot 0.16
+    # TODO: drop module specific build options
    #build-options: *musl-static-build-options
-   # TODO: drop module specific build options
     build-options:
       cflags: -static -static-pie -fPIC -I/usr/lib/sdk/devenv/include/libdrm
       cxxflags: -static -static-pie -fPIC
@@ -1851,66 +1852,66 @@ modules:
             cleanup:
               - '*'
 
-  - name: sway-static
-    # TODO: add setconf?
-    #build-options: *musl-static-build-options
-    # TODO: avoid in-module  build options
-    build-options:
-      cflags: -static -static-pie -fPIC
-      cxxflags: -static -static-pie -fPIC
-      ldflags: -static -static-pie -fPIC -Wl,-fuse-ld=mold -Wl,--allow-multiple-definition -Wl,-lEGL,-lEGL-generic,-lEGL,-lstdc++,-lXau,-lXdmcp,-lGL,-lXext,-lmesa,-lXxf86vm,-lxcb-glx,-lXfixes
-      env: *musl-toolchain-environment
-    buildsystem: meson
-    config-opts:
-      - --default-library=static
-      - --auto-features=disabled
-      - -Dwerror=false
-      - -Ddefault-wallpaper=false
-      - -Dzsh-completions=false
-      - -Dbash-completions=false
-      - -Dfish-completions=false
-      - -Dswaybar=false
-      - -Dswaynag=false
-      - -Dxwayland=disabled
-      - -Dtray=disabled
-      - -Dgdk-pixbuf=enabled
-      - -Dman-pages=disabled
-      - -Dsd-bus-provider=auto
-    sources:
-      - type: archive
-        url: https://github.com/swaywm/sway/archive/1.7/sway-1.7.tar.gz
-        sha256: 0c64536fb2883ec518e75cfb119f9300115fb49b084e3fde62b794fe2c6c8d84
-        x-checker-data:
-           type: anitya
-           project-id: 11497
-           stable-only: true
-           url-template: https://github.com/swaywm/sway/archive/$version/sway-$version.tar.gz
-    modules:
-      - name: json-c-static
-        build-options: *musl-static-build-options
-        buildsystem: cmake
-        config-opts:
-          - -DCMAKE_BUILD_TYPE=None
-          - -DBUILD_SHARED_LIBS=OFF
-          - -DBUILD_STATIC_LIBS=ON
-          - -DBUILD_TESTING=OFF
-          - -DENABLE_THREADING=ON
-          - -DENABLE_RDRAND=OFF
-        sources:
-          - type: archive
-            url: https://s3.amazonaws.com/json-c_releases/releases/json-c-0.15.tar.gz
-            sha256: b8d80a1ddb718b3ba7492916237bbf86609e9709fb007e7f7d4322f02341a4c6
-            x-checker-data:
-              type: anitya
-              project-id: 1477
-              stable-only: true
-              url-template: https://s3.amazonaws.com/json-c_releases/releases/json-c-$version.tar.gz
-        cleanup:
-          - '*'
+# - name: sway-static
+#   # TODO: avoid in-module  build options
+#   #build-options: *musl-static-build-options
+#   build-options:
+#     cflags: -static -static-pie -fPIC
+#     cxxflags: -static -static-pie -fPIC
+#     ldflags: -static -static-pie -fPIC -Wl,-fuse-ld=mold -Wl,--allow-multiple-definition -Wl,-lEGL,-lEGL-generic,-lEGL,-lstdc++,-lXau,-lXdmcp,-lGL,-lXext,-lmesa,-lXxf86vm,-lxcb-glx,-lXfixes
+#     env: *musl-toolchain-environment
+#   buildsystem: meson
+#   config-opts:
+#     - --default-library=static
+#     - --auto-features=disabled
+#     - -Dwerror=false
+#     - -Ddefault-wallpaper=false
+#     - -Dzsh-completions=false
+#     - -Dbash-completions=false
+#     - -Dfish-completions=false
+#     - -Dswaybar=false
+#     - -Dswaynag=false
+#     - -Dxwayland=disabled
+#     - -Dtray=disabled
+#     - -Dgdk-pixbuf=enabled
+#     - -Dman-pages=disabled
+#     - -Dsd-bus-provider=auto
+#   sources:
+#     - type: archive
+#       url: https://github.com/swaywm/sway/archive/1.7/sway-1.7.tar.gz
+#       sha256: 0c64536fb2883ec518e75cfb119f9300115fb49b084e3fde62b794fe2c6c8d84
+#       x-checker-data:
+#          type: anitya
+#          project-id: 11497
+#          stable-only: true
+#          url-template: https://github.com/swaywm/sway/archive/$version/sway-$version.tar.gz
+#   modules:
+#     - name: json-c-static
+#       build-options: *musl-static-build-options
+#       buildsystem: cmake
+#       config-opts:
+#         - -DCMAKE_BUILD_TYPE=None
+#         - -DBUILD_SHARED_LIBS=OFF
+#         - -DBUILD_STATIC_LIBS=ON
+#         - -DBUILD_TESTING=OFF
+#         - -DENABLE_THREADING=ON
+#         - -DENABLE_RDRAND=OFF
+#       sources:
+#         - type: archive
+#           url: https://s3.amazonaws.com/json-c_releases/releases/json-c-0.15.tar.gz
+#           sha256: b8d80a1ddb718b3ba7492916237bbf86609e9709fb007e7f7d4322f02341a4c6
+#           x-checker-data:
+#             type: anitya
+#             project-id: 1477
+#             stable-only: true
+#             url-template: https://s3.amazonaws.com/json-c_releases/releases/json-c-$version.tar.gz
+#       cleanup:
+#         - '*'
 
   - name: cage-static
+    # TODO: after wlroots 0.16 support, try patching to avoid egl and force pixman renderer
+    # TODO: avoid in-module build options
     #build-options: *musl-static-build-options
-    # TODO: avoid in-module  build options
     build-options:
       cflags: -static -static-pie -fPIC
       cxxflags: -static -static-pie -fPIC
