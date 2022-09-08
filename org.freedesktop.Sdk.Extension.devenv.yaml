@@ -23,7 +23,6 @@ build-options:
   append-path: /usr/lib/sdk/go-musl/bin:/usr/lib/sdk/musl/bin:/usr/lib/sdk/rust-musl/bin:/usr/lib/sdk/sccache/bin
   strip: true
   env:
-    - GO111MODULE=off
     - CARGO_VARS=
       HOME=${FLATPAK_BUILDER_BUILDDIR}
       CARGO_HOME=${FLATPAK_BUILDER_BUILDDIR}/cargo
@@ -33,6 +32,7 @@ build-options:
     # TODO: this is cache dir specific, maybe file a ticket upstream for in-cachedir config
     # NOTE: config file documentation @ https://github.com/mozilla/sccache/blob/main/docs/Configuration.md
     - SCCACHE_CONF=/run/ccache/sccache/config
+    - GO111MODULE=off
     # NOTE: gocache size cannot be capped, see https://github.com/golang/go/issues/29561
     # XDG_CACHE_HOME is set for a sane default when GOCACHE is empty
     - GOVARS=
@@ -1087,12 +1087,10 @@ modules:
                         # TODO: use globally set build options
                        #build-options: *musl-static-build-options
                         build-options:
-                          cflags: -static -fno-exceptions -fno-rtti
-                          cxxflags: -static -fno-exceptions -fno-rtti
-                          ldflags: -static
-                          env:
-                            - CC=x86_64-linux-musl-gcc
-                            - CXX=x86_64-linux-musl-g++
+                          cflags: -static -static-pie -fPIC -fno-exceptions -fno-rtti
+                          cxxflags: -static -static-pie -fPIC -fno-exceptions -fno-rtti
+                          ldflags: -static -static-pie -fPIC -Wl,-fuse-ld=mold
+                          env: *musl-toolchain-environment
                         buildsystem: meson
                         # TODO: add graphite2
                         config-opts:
@@ -1973,11 +1971,7 @@ modules:
       libdir: /usr/lib/sdk/devenv/python/lib
       prepend-path: /usr/lib/sdk/devenv/python/bin
       prepend-ld-library-path: /usr/lib/sdk/devenv/python/lib
-      env:
-        - AR=x86_64-linux-musl-ar
-        - CC=x86_64-linux-musl-gcc
-        - CXX=x86_64-linux-musl-g++
-        - LD=x86_64-linux-musl-ld.mold
+      env: *musl-toolchain-environment
     config-opts:
       # TODO: disable shared libpython after adding required modules
       - --enable-shared
@@ -2409,14 +2403,10 @@ modules:
     # TODO: use globally set build options
    #build-options: *musl-static-build-options
     build-options:
-      cflags: -static
-      cxxflags: -static
-      ldflags: -static
-      env:
-        - CC=x86_64-linux-musl-gcc
-        - CXX=x86_64-linux-musl-g++
-        - LIBS=-lX11 -lxcb -lX11-xcb -lXau -lxcb-xinput -lxcb-xkb -lXdmcp -lXext -lXmu
-          -lXmuu -lXt -lSM -lICE
+      cflags: -static -static-pie -fPIC
+      cxxflags: -static -static-pie -fPIC
+      ldflags: -static -static-pie -fPIC -Wl,-fuse-ld=mold -Wl,-lX11,-lxcb,-lX11-xcb,-lXau,-lxcb-xinput,-lxcb-xkb,-lXdmcp,-lXext,-lXmu,-lXmuu,-lXt,-lSM,-lICE
+      env: *musl-toolchain-environment
     sources:
       - type: archive
         url: https://github.com/astrand/xclip/archive/0.13/xclip-0.13.tar.gz
@@ -2431,13 +2421,10 @@ modules:
 # - name: xsel-static
 #  #build-options: *musl-static-build-options
 #   build-options:
-#     cflags: -static
-#     cxxflags: -static
-#     ldflags: -static
-#     env:
-#       - CC=x86_64-linux-musl-gcc
-#       - CXX=x86_64-linux-musl-g++
-#       - LIBS=-lX11 -lxcb -lX11-xcb -lXau -lxcb-xinput -lxcb-xkb -lXdmcp -lXext -lXmu -lXmuu -lXt
+#     cflags: -static -static-pie -fPIC
+#     cxxflags: -static -static-pie -fPIC
+#     ldflags: -static -static-pie -fPIC -Wl,-fuse-ld=mold -Wl,-lX11,-lxcb,-lX11-xcb,-lXau,-lxcb-xinput,-lxcb-xkb,-lXdmcp,-lXext,-lXmu,-lXmuu,-lXt,-lSM,-lICE
+#     env: *musl-toolchain-environment
 #   sources:
 #     - type: archive
 #       url: https://github.com/kfish/xsel/archive/9fc4e3e4e3f1231cabfdc2e1438155f9390bc517/xsel-9fc4e3e4e3f1231cabfdc2e1438155f9390bc517.tar.gz
