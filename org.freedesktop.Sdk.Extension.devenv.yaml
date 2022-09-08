@@ -1906,7 +1906,7 @@ modules:
 
   - name: python
     # TODO: build missing modules
-    # TODO: figure if musl-shared-build-options can be used
+    # TODO: figure if musl-shared-build-options can be used, anchor overrides/extensions don't work
    #build-options: *musl-shared-build-options
     build-options:
       # TODO: maybe set rpath for shared libs
