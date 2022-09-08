@@ -12,9 +12,21 @@ sdk-extensions:
   - org.freedesktop.Sdk.Extension.sccache
 
 build-options:
-  cflags: -I/usr/lib/sdk/devenv/include
-  cxxflags: -I/usr/lib/sdk/devenv/include
-  ldflags: -L/usr/lib/sdk/devenv/lib
+  # see org.freedesktop.Sdk@/etc/flatpak-builder/defaults.json
+  cflags:
+    -O2 -g -pipe -Wp,-D_FORTIFY_SOURCE=2 -Wp,-D_GLIBCXX_ASSERTIONS -fexceptions -fstack-protector-strong
+    -grecord-gcc-switches -fasynchronous-unwind-tables -fstack-clash-protection -fcf-protection -fno-omit-frame-pointer
+    -I/usr/lib/sdk/devenv/include -fPIC -static -static-pie
+  cflags-override: true
+  cxxflags:
+    -O2 -g -pipe -Wp,-D_FORTIFY_SOURCE=2 -Wp,-D_GLIBCXX_ASSERTIONS -fexceptions -fstack-protector-strong
+    -grecord-gcc-switches -fasynchronous-unwind-tables -fstack-clash-protection -fcf-protection -fno-omit-frame-pointer
+    -I/usr/lib/sdk/devenv/include -fPIC -static -static-pie
+  cxxflags-override: true
+ #cppflags:
+ #cppflags-override: true
+  ldflags: -L/usr/lib/sdk/devenv/lib -Wl,-z,relro,-z,now -Wl,--as-needed -fPIC -Wl,-fuse-ld=mold -static -static-pie
+  ldflags-override: true
   prefix: /usr/lib/sdk/devenv
   libdir: /usr/lib/sdk/devenv/lib
   prepend-path: /usr/lib/sdk/devenv/bin
@@ -23,6 +35,14 @@ build-options:
   append-path: /usr/lib/sdk/go-musl/bin:/usr/lib/sdk/musl/bin:/usr/lib/sdk/rust-musl/bin:/usr/lib/sdk/sccache/bin
   strip: true
   env:
+    - AR=x86_64-linux-musl-ar
+    - CC=x86_64-linux-musl-gcc
+    - CXX=x86_64-linux-musl-g++
+    - LD=x86_64-linux-musl-ld.mold
+    # TODO: consider overriding pkgconf envvars
+   #- PKG_CONFIG_LIBDIR=
+   #- PKG_CONFIG_PATH=/lib/pkgconfig:/share/pkgconfig
+   #- PKG_CONFIG_SYSROOT_DIR=/usr/lib/sdk/devenv
     - CARGO_VARS=
       HOME=${FLATPAK_BUILDER_BUILDDIR}
       CARGO_HOME=${FLATPAK_BUILDER_BUILDDIR}/cargo
@@ -45,26 +65,40 @@ build-options:
       PATH=${FLATPAK_DEST}/python/bin:${PATH}
       LD_LIBRARY_PATH=${FLATPAK_DEST}/python/lib:${LD_LIBRARY_PATH}
 
-x-musl-static-build-options: &musl-static-build-options
-  cflags: -static -static-pie -fPIC
-  cxxflags: -static -static-pie -fPIC
-  ldflags: -static -static-pie -fPIC -Wl,-fuse-ld=mold
-  env: &musl-toolchain-environment
-    - AR=x86_64-linux-musl-ar
-    - CC=x86_64-linux-musl-gcc
-    - CXX=x86_64-linux-musl-g++
-    - LD=x86_64-linux-musl-ld.mold
-# TODO: consider overriding pkgconf envvars
-   #- PKG_CONFIG_LIBDIR=
-   #- PKG_CONFIG_PATH=/lib/pkgconfig:/share/pkgconfig
-   #- PKG_CONFIG_SYSROOT_DIR=/usr/lib/sdk/devenv
-
 x-musl-shared-build-options: &musl-shared-build-options
-  cflags: -fPIC -Bstatic -Wl,--dynamic-linker=/usr/lib/sdk/devenv/lib/libc.musl-x86_64.so.1
-  cxxflags: -fPIC -Bstatic -Wl,--dynamic-linker=/usr/lib/sdk/devenv/lib/libc.musl-x86_64.so.1
-  ldflags: -fPIC -Bstatic -Wl,--dynamic-linker=/usr/lib/sdk/devenv/lib/libc.musl-x86_64.so.1
-    -Wl,-fuse-ld=mold
-  env: *musl-toolchain-environment
+  cflags:
+    -O2 -g -pipe -Wp,-D_FORTIFY_SOURCE=2 -Wp,-D_GLIBCXX_ASSERTIONS -fexceptions -fstack-protector-strong
+    -grecord-gcc-switches -fasynchronous-unwind-tables -fstack-clash-protection -fcf-protection -fno-omit-frame-pointer
+    -I/usr/lib/sdk/devenv/include -fPIC -Bstatic -Wl,--dynamic-linker=/usr/lib/sdk/devenv/lib/libc.musl-x86_64.so.1
+  cflags-override: true
+  cxxflags:
+    -O2 -g -pipe -Wp,-D_FORTIFY_SOURCE=2 -Wp,-D_GLIBCXX_ASSERTIONS -fexceptions -fstack-protector-strong
+    -grecord-gcc-switches -fasynchronous-unwind-tables -fstack-clash-protection -fcf-protection -fno-omit-frame-pointer
+    -I/usr/lib/sdk/devenv/include -fPIC -Bstatic -Wl,--dynamic-linker=/usr/lib/sdk/devenv/lib/libc.musl-x86_64.so.1
+  cxxflags-override: true
+ #cppflags:
+ #cppflags-override: true
+  ldflags: -L/usr/lib/sdk/devenv/lib -Wl,-z,relro,-z,now -Wl,--as-needed -fPIC -Wl,-fuse-ld=mold -Bstatic -Wl,--dynamic-linker=/usr/lib/sdk/devenv/lib/libc.musl-x86_64.so.1
+  ldflags-override: true
+
+x-gcc-gnu-build-options: &gcc-gnu-build-options
+  cflags:
+    -O2 -g -pipe -Wp,-D_FORTIFY_SOURCE=2 -Wp,-D_GLIBCXX_ASSERTIONS -fexceptions -fstack-protector-strong
+    -grecord-gcc-switches -fasynchronous-unwind-tables -fstack-clash-protection -fcf-protection -fno-omit-frame-pointer
+  cflags-override: true
+  cxxflags:
+    -O2 -g -pipe -Wp,-D_FORTIFY_SOURCE=2 -Wp,-D_GLIBCXX_ASSERTIONS -fexceptions -fstack-protector-strong
+    -grecord-gcc-switches -fasynchronous-unwind-tables -fstack-clash-protection -fcf-protection -fno-omit-frame-pointer
+  cxxflags-override: true
+ #cppflags:
+ #cppflags-override: true
+  ldflags: -Wl,-z,relro,-z,now -Wl,--as-needed
+  ldflags-override: true
+  env:
+    - AR=ar
+    - CC=gcc
+    - CXX=g++
+    - LD=ld
 
 x-cargo-build-commands: &cargo-build-commands
   - eval ${CARGO_VARS} ${CARGO_VARS_EXTRA} cargo fetch
@@ -168,6 +202,7 @@ modules:
 
 # - name: meson
 #   # NOTE: modules that need this would likely have to set PYTHONPATH to ${FLATPAK_DEST}/python$(python -c 'import sys; print("%s%s" %sys.version_info[0:2])')/site-packages
+#   build-options: *gcc-gnu-build-options
 #   buildsystem: simple
 #   build-commands:
 #     - python setup.py build
@@ -192,7 +227,6 @@ modules:
   # Libraries: Data compression
 
   - name: bzip2-static
-    build-options: *musl-static-build-options
     no-autogen: true
     make-install-args:
       - PREFIX=${FLATPAK_DEST}
@@ -213,7 +247,6 @@ modules:
       - '*'
 
   - name: lz4-static
-    build-options: *musl-static-build-options
     no-autogen: true
     subdir: lib
     make-install-args:
@@ -236,7 +269,6 @@ modules:
       - '*'
 
   - name: xz-static
-    build-options: *musl-static-build-options
     config-opts:
       - --disable-shared
       - --disable-nls
@@ -260,7 +292,6 @@ modules:
       - '*'
 
   - name: zlib-static
-    build-options: *musl-static-build-options
     config-opts:
       - --static
     sources:
@@ -276,7 +307,6 @@ modules:
       - '*'
 
   - name: zstd-static # depends on lz4 xz zlib
-    build-options: *musl-static-build-options
     subdir: build/cmake
     buildsystem: cmake
     config-opts:
@@ -299,7 +329,6 @@ modules:
   # Libraries: Level1
 
   - name: acl-static
-    build-options: *musl-static-build-options
     config-opts:
       - --disable-shared
     sources:
@@ -315,7 +344,6 @@ modules:
       - '*'
     modules:
       - name: attr-static
-        build-options: *musl-static-build-options
         config-opts:
           - --disable-shared
         sources:
@@ -331,7 +359,6 @@ modules:
           - '*'
 
   - name: expat-static
-    build-options: *musl-static-build-options
     buildsystem: cmake
     config-opts:
       - -DEXPAT_BUILD_TOOLS=OFF
@@ -352,7 +379,6 @@ modules:
       - '*'
 
   - name: fuse3-static
-    build-options: *musl-static-build-options
     buildsystem: meson
     config-opts:
       - --default-library=static
@@ -375,7 +401,6 @@ modules:
       - '*'
 
   - name: gpgme-static
-    build-options: *musl-static-build-options
     config-opts:
       - --disable-shared
     make-args:
@@ -400,7 +425,6 @@ modules:
       - '*'
     modules:
       - name: libassuan-static
-        build-options: *musl-static-build-options
         config-opts:
           - --disable-shared
         make-args:
@@ -422,7 +446,6 @@ modules:
           - '*'
         modules:
           - name: libgpg-error-static
-            build-options: *musl-static-build-options
             config-opts:
               - --disable-shared
               - --disable-nls
@@ -445,7 +468,6 @@ modules:
               - '*'
 
   - name: libffi-static
-    build-options: *musl-static-build-options
     config-opts:
       - --disable-shared
     sources:
@@ -462,7 +484,6 @@ modules:
 
   - name: libidn2-static
     # TODO: add libunistring dependency?
-    build-options: *musl-static-build-options
     config-opts:
       - --disable-shared
     sources:
@@ -478,7 +499,6 @@ modules:
       - '*'
 
   - name: libjpeg-turbo-static
-    build-options: *musl-static-build-options
     buildsystem: cmake
     config-opts:
       - -DENABLE_SHARED=OFF
@@ -497,7 +517,6 @@ modules:
       - '*'
 
   - name: openssl-static
-    build-options: *musl-static-build-options
     config-opts:
       - --libdir=lib
       - --openssldir=/etc/ssl
@@ -531,7 +550,6 @@ modules:
       - '*'
 
   - name: popt-static
-    build-options: *musl-static-build-options
     config-opts:
       - --disable-shared
     sources:
@@ -547,7 +565,6 @@ modules:
       - '*'
 
   - name: readline-static
-    build-options: *musl-static-build-options
     config-opts:
       - --disable-shared
       - --with-curses
@@ -566,7 +583,6 @@ modules:
       - '*'
     modules:
       - name: ncurses-static
-        build-options: *musl-static-build-options
         config-opts:
           - --without-dlsym
           - --with-terminfo-dirs=${datadir}/share/terminfo:/var/lib/devenv/share/terminfo:/usr/share/terminfo
@@ -604,7 +620,6 @@ modules:
           - '*'
 
   - name: tcl-static # depends on zlib
-    build-options: *musl-static-build-options
     subdir: unix
     config-opts:
       - --mandir=${prefix}/share/man
@@ -632,7 +647,6 @@ modules:
       - '*'
 
   - name: xxhash-static
-    build-options: *musl-static-build-options
     no-autogen: true
     make-args:
       - lib
@@ -657,7 +671,6 @@ modules:
   #  Libraries: Level2
 
   - name: gdbm-static # depends on readline
-    build-options: *musl-static-build-options
     config-opts:
       - --disable-shared
       - --enable-libgdbm-compat
@@ -677,7 +690,6 @@ modules:
       - '*'
 
   - name: krb5-static
-    build-options: *musl-static-build-options
     subdir: src
     config-opts:
       - --localstatedir=/var/lib
@@ -700,7 +712,6 @@ modules:
       - '*'
 
   - name: libarchive-static # depends on acl bzip2 expat lz4 openssl xz zlib zstd
-    build-options: *musl-static-build-options
     config-opts:
       - --disable-shared
       - --disable-bsdcat
@@ -721,7 +732,6 @@ modules:
 
   - name: libevent-static  # depends on openssl
     # TODO: try again to build static lib with cmake
-    build-options: *musl-static-build-options
     config-opts:
       - --disable-shared
       - --enable-openssl
@@ -738,7 +748,6 @@ modules:
       - '*'
 
   - name: libpng-static # depends on zlib
-    build-options: *musl-static-build-options
     config-opts:
       - --enable-static
     make-args:
@@ -756,7 +765,6 @@ modules:
       - '*'
 
   - name: libssh-static # depends on openssl zlib
-    build-options: *musl-static-build-options
     buildsystem: cmake
     builddir: true
     config-opts:
@@ -780,7 +788,6 @@ modules:
 
   - name: libxml2-static # depends on ncurses readline xz zlib
     # TODO: test if icu should be enabled
-    build-options: *musl-static-build-options
     config-opts:
       - --enable-static
       - --without-python
@@ -797,7 +804,6 @@ modules:
       - '*'
 
   - name: pcre-static # depends on bzip2 readline zlib
-    build-options: *musl-static-build-options
     config-opts:
       - --disable-shared
     sources:
@@ -813,7 +819,6 @@ modules:
       - '*'
 
   - name: pcre2-static # depends on bzip2 readline zlib
-    build-options: *musl-static-build-options
     config-opts:
       - --disable-shared
       - --enable-pcre2-16
@@ -834,7 +839,6 @@ modules:
       - '*'
 
   - name: sqlite-static # depends on readline tcl(util) zlib
-    build-options: *musl-static-build-options
     config-opts:
       - --disable-shared
       - --disable-tcl
@@ -865,7 +869,6 @@ modules:
 
   - name: glib2-static # depends on libffi pcre zlib
     # NOTE: need a recent meson version
-    build-options: *musl-static-build-options
     buildsystem: meson
     config-opts:
       - --default-library=static
@@ -890,7 +893,6 @@ modules:
 
   - name: libsasl-static # depends on gdbm openssl
     # TODO: evaluate adding dependencies krb5 liblsap mariadb postgresql sqlite
-    build-options: *musl-static-build-options
     config-opts:
       - --sbindir=${prefix}/bin
       - --disable-shared
@@ -916,7 +918,6 @@ modules:
   # Libraries: Level4
 
   - name: librsvg-static # depends on bzip2 glib2 expat libffi libpng libxml2 pcre
-    build-options: *musl-static-build-options
     config-opts:
       - --disable-shared
       - --enable-pixbuf-loader
@@ -946,7 +947,6 @@ modules:
     modules:
       - name: gdk-pixbuf2-static # depends on glib2 libjpeg-turbo libpng
         # TODO: add depends libtiff and enable loader
-        build-options: *musl-static-build-options
         buildsystem: meson
         config-opts:
           - --default-library=static
@@ -979,7 +979,6 @@ modules:
         cleanup:
           - '*'
       - name: pango-static
-        build-options: *musl-static-build-options
         buildsystem: meson
         config-opts:
           - --default-library=static
@@ -1004,7 +1003,6 @@ modules:
           - '*'
         modules:
           - name: cairo-static
-            build-options: *musl-static-build-options
             buildsystem: meson
             config-opts:
               - --default-library=static
@@ -1040,7 +1038,6 @@ modules:
               - name: fontconfig-static
                 # TODO: import flatpak runtime cache patches
                 buildsystem: meson
-                build-options: *musl-static-build-options
                 config-opts:
                   - --default-library=static
                   - -Ddoc=disabled
@@ -1061,7 +1058,6 @@ modules:
                   - '*'
                 modules:
                   - name: freetype2-static
-                    build-options: *musl-static-build-options
                     buildsystem: meson
                     config-opts:
                       - --default-library=static
@@ -1084,13 +1080,9 @@ modules:
                       - '*'
                     modules:
                       - name: harfbuzz-static
-                        # TODO: use globally set build options
-                       #build-options: *musl-static-build-options
                         build-options:
-                          cflags: -static -static-pie -fPIC -fno-exceptions -fno-rtti
-                          cxxflags: -static -static-pie -fPIC -fno-exceptions -fno-rtti
-                          ldflags: -static -static-pie -fPIC -Wl,-fuse-ld=mold
-                          env: *musl-toolchain-environment
+                          cflags: -fno-exceptions -fno-rtti
+                          cxxflags: -fno-exceptions -fno-rtti
                         buildsystem: meson
                         # TODO: add graphite2
                         config-opts:
@@ -1121,7 +1113,6 @@ modules:
                           - '*'
                         modules:
                           - name: freetype2-noharfbuzz-static
-                            build-options: *musl-static-build-options
                             buildsystem: meson
                             config-opts:
                               - --default-library=static
@@ -1143,7 +1134,6 @@ modules:
                             cleanup:
                               - '*'
               - name: pixman-static
-                build-options: *musl-static-build-options
                 buildsystem: meson
                 config-opts:
                   - --default-library=static
@@ -1170,7 +1160,6 @@ modules:
                 cleanup:
                   - '*'
           - name: fribidi-static
-            build-options: *musl-static-build-options
             buildsystem: meson
             config-opts:
               - --default-library=static
@@ -1193,7 +1182,6 @@ modules:
   # Libraries: Display server
 
   - name: wayland-static # depends on expat liffi
-    build-options: *musl-static-build-options
     buildsystem: meson
     config-opts:
       - --default-library=static
@@ -1227,7 +1215,6 @@ modules:
       - '*'
 
   - name: libxmu-static
-    build-options: *musl-static-build-options
     config-opts:
       - --disable-shared
       - --disable-docs
@@ -1263,7 +1250,6 @@ modules:
           - '*'
       - name: xorgproto
         # needed for correct detection of fds_bits
-        build-options: *musl-static-build-options
         post-install:
           - mv ${FLATPAK_DEST}/share/pkgconfig/* ${FLATPAK_DEST}/lib/pkgconfig/
         sources:
@@ -1292,7 +1278,6 @@ modules:
         cleanup:
           - '*'
       - name: libx11-static
-        build-options: *musl-static-build-options
         config-opts:
           - --disable-shared
           - --disable-specs
@@ -1314,7 +1299,6 @@ modules:
           - '*'
         modules:
           - name: libxcb-static
-            build-options: *musl-static-build-options
             config-opts:
               - --disable-shared
               - --enable-xinput
@@ -1355,7 +1339,6 @@ modules:
               - '*'
             modules:
               - name: libxau-static
-                build-options: *musl-static-build-options
                 config-opts:
                   - --disable-shared
                 sources:
@@ -1370,7 +1353,6 @@ modules:
                 cleanup:
                   - '*'
               - name: libxdmcp-static
-                build-options: *musl-static-build-options
                 config-opts:
                   - --disable-shared
                 sources:
@@ -1385,7 +1367,6 @@ modules:
                 cleanup:
                   - '*'
               - name: xcb-proto
-                build-options: *musl-static-build-options
                 config-opts:
                   - --disable-shared
                 make-install-args:
@@ -1402,7 +1383,6 @@ modules:
                 cleanup:
                   - '*'
           - name: xcb-util-renderutil-static # needed for wlroots
-            build-options: *musl-static-build-options
             config-opts:
               - --disable-shared
               - --disable-devel-docs
@@ -1418,7 +1398,6 @@ modules:
             cleanup:
               - '*'
       - name: libxext-static
-        build-options: *musl-static-build-options
         config-opts:
           - --disable-shared
         sources:
@@ -1433,7 +1412,6 @@ modules:
         cleanup:
           - '*'
       - name: libxt-static
-        build-options: *musl-static-build-options
         config-opts:
           - --disable-shared
           - --disable-specs
@@ -1454,7 +1432,6 @@ modules:
           - '*'
         modules:
           - name: libsm-static
-            build-options: *musl-static-build-options
             config-opts:
               - --disable-shared
               - --disable-docs
@@ -1476,7 +1453,6 @@ modules:
               - '*'
             modules:
               - name: libice-static
-                build-options: *musl-static-build-options
                 config-opts:
                   - --disable-shared
                 sources:
@@ -1492,7 +1468,6 @@ modules:
                   - '*'
 
   - name: libxfixes-static # meeded for mesa wlroots
-    build-options: *musl-static-build-options
     config-opts:
       - --disable-shared
     sources:
@@ -1508,7 +1483,6 @@ modules:
       - '*'
 
   - name: libxshmfence-static # meeded for mesa wlroots
-    build-options: *musl-static-build-options
     config-opts:
       - --disable-shared
     sources:
@@ -1524,7 +1498,6 @@ modules:
       - '*'
 
   - name: libxxf86vm-static # meeded for mesa
-    build-options: *musl-static-build-options
     config-opts:
       - --disable-shared
     sources:
@@ -1540,9 +1513,8 @@ modules:
       - '*'
 
   - name: xorg-xhost-static
-    build-options: *musl-static-build-options
-    make-args:
-      - LIBS+=-lxcb -lXdmcp -lXau
+    build-options:
+      ldflags: -Wl,-lxcb,-lXdmcp,-lXau
     sources:
       - type: archive
         url: https://www.x.org/releases/individual/app/xhost-1.0.8.tar.gz
@@ -1555,15 +1527,9 @@ modules:
 
   - name: mesa-static
     # TODO: try dropping after cage updates for wlroot 0.16
-    # TODO: drop module specific build options
-   #build-options: *musl-static-build-options
     build-options:
-      cflags: -static -static-pie -fPIC -I/usr/lib/sdk/devenv/include/libdrm
-      cxxflags: -static -static-pie -fPIC
-      ldflags: -static -static-pie -fPIC -Wl,-fuse-ld=mold -Wl,-lncursesw,-lXau,-lXdmcp
-      env: *musl-toolchain-environment
-      prepend-path: /usr/lib/sdk/llvm-musl/bin
-      prepend-ld-library-path: /usr/lib/sdk/llvm-musl/lib
+      cflags: -I/usr/lib/sdk/devenv/include/libdrm
+      ldflags: -Wl,-lncursesw,-lXau,-lXdmcp
     buildsystem: meson
     config-opts:
       # TODO: maybe enable dri3
@@ -1656,7 +1622,6 @@ modules:
     modules:
       - name: eudev-static
         # TODO: maybe move up
-        build-options: *musl-static-build-options
         config-opts:
           - --disable-shared
           - --disable-programs
@@ -1677,7 +1642,6 @@ modules:
         cleanup:
           - '*'
       - name: libdrm-static
-        build-options: *musl-static-build-options
         buildsystem: meson
         config-opts:
           - --default-library=static
@@ -1713,7 +1677,6 @@ modules:
   - name: wlroots-static
     # TODO: evaluate need of seatd or polkit
     # TODO: possibly add depends xcb-util-errors xcb-util-wm xorg-xwayland glslang
-    build-options: *musl-static-build-options
     buildsystem: meson
     config-opts:
       - --default-library=static
@@ -1739,7 +1702,6 @@ modules:
       - '*'
     modules:
       - name: seatd-static
-        build-options: *musl-static-build-options
         buildsystem: meson
         config-opts:
           - --default-library=static
@@ -1761,7 +1723,6 @@ modules:
         cleanup:
           - '*'
       - name: libxkbcommon-static
-        build-options: *musl-static-build-options
         buildsystem: meson
         config-opts:
           - --default-library=static
@@ -1791,7 +1752,6 @@ modules:
         cleanup:
           - '*'
       - name: libinput-static
-        build-options: *musl-static-build-options
         buildsystem: meson
         config-opts:
           - --default-library=static
@@ -1818,7 +1778,6 @@ modules:
           - '*'
         modules:
           - name: libevdev-static
-            build-options: *musl-static-build-options
             buildsystem: meson
             config-opts:
               - --default-library=static
@@ -1836,7 +1795,6 @@ modules:
             cleanup:
               - '*'
           - name: mtdev-static
-            build-options: *musl-static-build-options
             config-opts:
               - --disable-shared
             sources:
@@ -1852,13 +1810,8 @@ modules:
               - '*'
 
 # - name: sway-static
-#   # TODO: avoid in-module  build options
-#   #build-options: *musl-static-build-options
 #   build-options:
-#     cflags: -static -static-pie -fPIC
-#     cxxflags: -static -static-pie -fPIC
-#     ldflags: -static -static-pie -fPIC -Wl,-fuse-ld=mold -Wl,--allow-multiple-definition -Wl,-lEGL,-lEGL-generic,-lEGL,-lstdc++,-lXau,-lXdmcp,-lGL,-lXext,-lmesa,-lXxf86vm,-lxcb-glx,-lXfixes
-#     env: *musl-toolchain-environment
+#     ldflags: -Wl,--allow-multiple-definition -Wl,-lEGL,-lEGL-generic,-lEGL,-lstdc++,-lXau,-lXdmcp,-lGL,-lXext,-lmesa,-lXxf86vm,-lxcb-glx,-lXfixes
 #   buildsystem: meson
 #   config-opts:
 #     - --default-library=static
@@ -1886,7 +1839,6 @@ modules:
 #          url-template: https://github.com/swaywm/sway/archive/$version/sway-$version.tar.gz
 #   modules:
 #     - name: json-c-static
-#       build-options: *musl-static-build-options
 #       buildsystem: cmake
 #       config-opts:
 #         - -DCMAKE_BUILD_TYPE=None
@@ -1909,13 +1861,8 @@ modules:
 
   - name: cage-static
     # TODO: after wlroots 0.16 support, try patching to avoid egl and force pixman renderer
-    # TODO: avoid in-module build options
-    #build-options: *musl-static-build-options
     build-options:
-      cflags: -static -static-pie -fPIC
-      cxxflags: -static -static-pie -fPIC
-      ldflags: -static -static-pie -fPIC -Wl,-fuse-ld=mold -Wl,--allow-multiple-definition -Wl,-lEGL,-lEGL-generic,-lEGL,-lstdc++,-lXau,-lXdmcp,-lGL,-lXext,-lmesa,-lXxf86vm,-lxcb-glx,-lXfixes
-      env: *musl-toolchain-environment
+      ldflags: -Wl,--allow-multiple-definition -Wl,-lEGL,-lEGL-generic,-lEGL,-lstdc++,-lXau,-lXdmcp,-lGL,-lXext,-lmesa,-lXxf86vm,-lxcb-glx,-lXfixes
     buildsystem: meson
     config-opts:
       - --default-library=static
@@ -1971,7 +1918,6 @@ modules:
       libdir: /usr/lib/sdk/devenv/python/lib
       prepend-path: /usr/lib/sdk/devenv/python/bin
       prepend-ld-library-path: /usr/lib/sdk/devenv/python/lib
-      env: *musl-toolchain-environment
     config-opts:
       # TODO: disable shared libpython after adding required modules
       - --enable-shared
@@ -2118,7 +2064,6 @@ modules:
 #     - go-md2man-go-sources.json # OFFLINE-BUILD, flatpak-go-get-generator.py -o go-md2man-go-sources.json ./
 
   - name: md2roff-static
-    build-options: *musl-static-build-options
     no-autogen: true
     make-install-args:
       - prefix=${FLATPAK_DEST}
@@ -2140,7 +2085,6 @@ modules:
   ############################
 
   - name: cabextract-static
-    build-options: *musl-static-build-options
     sources:
       - type: archive
         url: https://cabextract.org.uk/cabextract-1.9.1.tar.gz
@@ -2166,7 +2110,6 @@ modules:
         sha256: f319f14d27b909bd891adde4ccb4a8e910e15f9f4977b3e9bf78fbf7f2444866
 
   - name: p7zip-static
-    build-options: *musl-static-build-options
     no-autogen: true
     make-args:
      # TODO: build 7z with shared musl libc, missing 7z also breaks auto-loading fish completion
@@ -2194,7 +2137,6 @@ modules:
           - sed -i '/^CC/d;/^CXX/d;/^CC_SHARED/d;/^LINK_SHARED/d' makefile.machine
 
   - name: unrar-static
-    build-options: *musl-static-build-options
     no-autogen: true
     make-args:
       - -j1
@@ -2215,7 +2157,6 @@ modules:
           - sed -i 's/\(^DESTDIR\)=.*/\1=${FLATPAK_DEST}/' makefile
 
   - name: upx-static
-    build-options: *musl-static-build-options
     no-autogen: true
     no-make-install: true
     make-args:
@@ -2238,7 +2179,6 @@ modules:
           url-template: https://github.com/upx/upx/releases/download/v$version/upx-$version-src.tar.xz
     modules:
       - name: ucl-static
-        build-options: *musl-static-build-options
         config-opts:
           - --disable-shared
         make-args:
@@ -2265,7 +2205,6 @@ modules:
   ############################
 
   - name: bbe-static
-    build-options: *musl-static-build-options
     sources:
       - type: archive
         url: http://downloads.sourceforge.net/bbe-/bbe-0.2.2.tar.gz
@@ -2292,7 +2231,6 @@ modules:
           url-template: https://github.com/wader/fq/releases/download/v0.0.8/fq_${version}_linux_amd64.tar.gz
 
   - name: hexer-static
-    build-options: *musl-static-build-options
     no-autogen: true
     make-args:
       - LTERMCAP=-lncurses
@@ -2327,7 +2265,6 @@ modules:
           url-template: https://github.com/sharkdp/hexyl/releases/download/v$version/hexyl-v$version-x86_64-unknown-linux-musl.tar.gz
 
   - name: patchelf-static
-    build-options: *musl-static-build-options
     sources:
       - type: archive
         url: https://github.com/NixOS/patchelf/archive/0.15.0.tar.gz
@@ -2339,7 +2276,6 @@ modules:
           url-template: https://github.com/NixOS/patchelf/archive/$version.tar.gz
 
   - name: xdelta3-static
-    build-options: *musl-static-build-options
     subdir: xdelta3
     sources:
       - type: archive
@@ -2358,7 +2294,6 @@ modules:
           - sed -i 's/\(\$(CCLD)\)/\1 -all-static/' Makefile.in
     modules:
       - name: ncompress-static
-        build-options: *musl-static-build-options
         no-autogen: true
         no-make-install: true
         build-commands:
@@ -2381,7 +2316,6 @@ modules:
   ############################
 
   - name: wl-clipboard-static
-    build-options: *musl-static-build-options
     buildsystem: meson
     config-opts:
       - -Dfishcompletiondir=no
@@ -2400,13 +2334,8 @@ modules:
           url-template: https://github.com/bugaevc/wl-clipboard/archive/v$version/wl-clipboard-$version.tar.gz
 
   - name: xclip-static
-    # TODO: use globally set build options
-   #build-options: *musl-static-build-options
     build-options:
-      cflags: -static -static-pie -fPIC
-      cxxflags: -static -static-pie -fPIC
-      ldflags: -static -static-pie -fPIC -Wl,-fuse-ld=mold -Wl,-lX11,-lxcb,-lX11-xcb,-lXau,-lxcb-xinput,-lxcb-xkb,-lXdmcp,-lXext,-lXmu,-lXmuu,-lXt,-lSM,-lICE
-      env: *musl-toolchain-environment
+      ldflags: -Wl,-lX11,-lxcb,-lX11-xcb,-lXau,-lxcb-xinput,-lxcb-xkb,-lXdmcp,-lXext,-lXmu,-lXmuu,-lXt,-lSM,-lICE
     sources:
       - type: archive
         url: https://github.com/astrand/xclip/archive/0.13/xclip-0.13.tar.gz
@@ -2419,12 +2348,8 @@ modules:
     cleanup:
       - /bin/xclip-*file
 # - name: xsel-static
-#  #build-options: *musl-static-build-options
 #   build-options:
-#     cflags: -static -static-pie -fPIC
-#     cxxflags: -static -static-pie -fPIC
-#     ldflags: -static -static-pie -fPIC -Wl,-fuse-ld=mold -Wl,-lX11,-lxcb,-lX11-xcb,-lXau,-lxcb-xinput,-lxcb-xkb,-lXdmcp,-lXext,-lXmu,-lXmuu,-lXt,-lSM,-lICE
-#     env: *musl-toolchain-environment
+#     ldflags: -Wl,-lX11,-lxcb,-lX11-xcb,-lXau,-lxcb-xinput,-lxcb-xkb,-lXdmcp,-lXext,-lXmu,-lXmuu,-lXt,-lSM,-lICE
 #   sources:
 #     - type: archive
 #       url: https://github.com/kfish/xsel/archive/9fc4e3e4e3f1231cabfdc2e1438155f9390bc517/xsel-9fc4e3e4e3f1231cabfdc2e1438155f9390bc517.tar.gz
@@ -2480,7 +2405,6 @@ modules:
           url-template: https://github.com/helix-editor/helix/releases/download/$version/helix-$version-x86_64-linux.tar.xz
 
   - name: kakoune-static
-    build-options: *musl-static-build-options
     no-autogen: true
     make-install-args:
       - PREFIX=${FLATPAK_DEST}
@@ -2556,7 +2480,6 @@ modules:
 
   - name: neovim-static
     # TODO: add python-pynvim in venv after keeping python packaged
-    build-options: *musl-static-build-options
     config-opts:
       - -DCMAKE_BUILD_TYPE=RelWithDebInfo
       # wrong detection of msgpack set this to /usr/include
@@ -2586,7 +2509,6 @@ modules:
     modules:
       - name: libluv-static
         # TODO: move this to libraries section, common dependency with bind
-        build-options: *musl-static-build-options
         buildsystem: cmake-ninja
         config-opts:
           - -DBUILD_MODULE=OFF
@@ -2604,7 +2526,6 @@ modules:
         modules:
           - name: libuv-static
             # TODO: evaluate adding libnsl dependency
-            build-options: *musl-static-build-options
             config-opts:
               - --disable-shared
             sources:
@@ -2644,7 +2565,6 @@ modules:
             cleanup:
               - /bin
       - name: libtermkey-static
-        build-options: *musl-static-build-options
         no-autogen: true
         make-install-args:
           - PREFIX=${FLATPAK_DEST}
@@ -2663,7 +2583,6 @@ modules:
                 -i Makefile
         modules:
           - name: unibilium-static
-            build-options: *musl-static-build-options
             no-autogen: true
             make-install-args:
               - PREFIX=${FLATPAK_DEST}
@@ -2725,7 +2644,6 @@ modules:
           - '*'
         modules:
           - name: mpack-static
-            build-options: *musl-static-build-options
             no-autogen: true
             make-install-args:
               - PREFIX=${FLATPAK_DEST}
@@ -2744,7 +2662,6 @@ modules:
             cleanup:
               - '*'
       - name: libvterm-static
-        build-options: *musl-static-build-options
         no-autogen: true
         make-install-args:
           - PREFIX=${FLATPAK_DEST}
@@ -2762,7 +2679,6 @@ modules:
         cleanup:
           - /bin
       - name: msgpack-c-static
-        build-options: *musl-static-build-options
         buildsystem: cmake-ninja
         config-opts:
           - -DMSGPACK_ENABLE_STATIC=ON
@@ -2779,7 +2695,6 @@ modules:
         cleanup:
           - /lib/cmake
       - name: tree-sitter-static
-        build-options: *musl-static-build-options
         no-autogen: true
         make-install-args:
           - PREFIX=${FLATPAK_DEST}
@@ -2853,7 +2768,6 @@ modules:
           url-template: https://github.com/Wilfred/difftastic/releases/download/$version/difft-x86_64-unknown-linux-gnu.tar.gz
 
   - name: highlight-static
-    build-options: *musl-static-build-options
     no-autogen: true
     make-args:
       - LUA_CFLAGS=-I${FLATPAK_DEST}/include
@@ -2892,7 +2806,6 @@ modules:
         cleanup:
           - '*'
       - name: lua-static
-        build-options: *musl-static-build-options
         #cflags: -fPIC -DLUA_USE_LINUX
         no-autogen: true
         make-install-args:
@@ -2943,9 +2856,8 @@ modules:
           url-template: https://github.com/dandavison/delta/archive/$version/delta-$version.tar.gz
 
   - name: patchutils-static
-    build-options: *musl-static-build-options
-    make-args:
-      - LIBS=-lpcre2-posix -lpcre2-8 -lpcre2-16 -lpcre2-32
+    build-options:
+      cflags: -Wl,-lpcre2-posix,-lpcre2-8,-lpcre2-16,-lpcre2-32
     sources:
       - type: archive
         url: http://cyberelk.net/tim/data/patchutils/stable/patchutils-0.4.2.tar.xz
@@ -2977,7 +2889,6 @@ modules:
       - install -Dm755 ${SCCACHE_BIN} -t ${FLATPAK_DEST}/bin/
 
   - name: stringsext-static
-    build-options: *musl-static-build-options
     buildsystem: simple
     build-commands: *cargo-build-commands
     post-install:
@@ -3303,7 +3214,6 @@ modules:
 #         - '*.pod'
 
   - name: tig-static
-    build-options: *musl-static-build-options
     make-install-args:
       - install-doc-man
     post-install:
@@ -3368,7 +3278,6 @@ modules:
       - podman-tui-go-sources.json # OFFLINE-BUILD, flatpak-go-get-generator.py -o podman-tui-go-sources.json ./
     modules:
       - name: btrfs-progs-static # depends on zstd
-        build-options: *musl-static-build-options
         config-opts:
           - --disable-shared
           - --disable-programs
@@ -3391,7 +3300,6 @@ modules:
         cleanup:
           - '*'
       - name: device-mapper-static
-        build-options: *musl-static-build-options
         config-opts:
           - --disable-shared
           - --sbindir=${bindir}
@@ -3421,7 +3329,6 @@ modules:
           - '*'
         modules:
           - name: libaio-static
-            build-options: *musl-static-build-options
             no-autogen: true
             make-args:
               - ENABLE_SHARED=0
@@ -3461,7 +3368,6 @@ modules:
   ############################
 
   - name: dos2unix-static
-    build-options: *musl-static-build-options
     no-autogen: true
     sources:
       - type: archive
@@ -3494,7 +3400,6 @@ modules:
             + "/yq_linux_amd64"'
 
   - name: jq-static
-    build-options: *musl-static-build-options
     config-opts:
       - --enable-all-static
     sources:
@@ -3508,7 +3413,6 @@ modules:
           url-template: https://github.com/stedolan/jq/releases/download/jq-$version/jq-$version.tar.gz
     modules:
       - name: oniguruma-static
-        build-options: *musl-static-build-options
         config-opts:
           - --enable-posix-api
         sources:
@@ -3528,7 +3432,6 @@ modules:
 
   - name: stow
     # TODO: replace this with binary alternative
-    build-options: *musl-static-build-options
     sources:
       - type: archive
         url: https://ftp.gnu.org/gnu/stow/stow-2.3.1.tar.gz
@@ -3573,7 +3476,6 @@ modules:
           url-template: https://github.com/restic/restic/releases/download/v$version/restic-$version.tar.gz
 
   - name: rsync-static
-    build-options: *musl-static-build-options
     config-opts:
       - --disable-md2man
       - --with-included-popt=no
@@ -3595,7 +3497,6 @@ modules:
   ############################
 
   - name: ostree-static
-    build-options: *musl-static-build-options
     config-opts:
       - --disable-shared
       - --libexec=${prefix}/lib
@@ -3642,7 +3543,6 @@ modules:
       - /share/ostree
     modules:
       - name: curl-static # depends on brotli krb5 libidn2 libnghttp2openssl zlib zstd
-        build-options: *musl-static-build-options
         # TODO: add more depends brotli libpsl libssh2
         # TODO: explicit features
         # TODO: remove executables and move to libraries section
@@ -3672,7 +3572,6 @@ modules:
           - '*'
       - name: e2fsprogs-static
         # NOTE: includes linux-utils' libblkid and libuuid, can be disabled
-        build-options: *musl-static-build-options
         config-opts:
           - --disable-shared
           - --sbindir=${bindir}
@@ -3700,7 +3599,6 @@ modules:
           - '*'
 
   - name: sshfs-static
-    build-options: *musl-static-build-options
     buildsystem: meson
     config-opts:
       - --default-library=static
@@ -3786,7 +3684,6 @@ modules:
           url-template: https://dev.yorhel.nl/download/ncdu-$version.tar.gz
 
   - name: tree-static
-    build-options: *musl-static-build-options
     no-autogen: true
     make-install-args:
       - PREFIX=${FLATPAK_DEST}
@@ -3888,7 +3785,6 @@ modules:
       - /python/lib/python*
 
   - name: vifm-static
-    build-options: *musl-static-build-options
     config-opts:
       # actually used to set -I${vifm_cv_curses}/include/${curses_lib_name}
       - --with-curses=/usr/lib/sdk/devenv
@@ -3980,7 +3876,6 @@ modules:
           url-template: https://github.com/junegunn/fzf/archive/$version/fzf-$version.tar.gz
 
   - name: fzy-static
-    build-options: *musl-static-build-options
     no-autogen: true
     make-install-args:
       - PREFIX=${FLATPAK_DEST}
@@ -4042,7 +3937,6 @@ modules:
           url-template: https://github.com/lotabout/skim/releases/download/v$version/skim-v$version-x86_64-unknown-linux-musl.tar.gz
 
   - name: ugrep-static
-    build-options: *musl-static-build-options
     config-opts:
       - --with-bzlib=/usr/lib/sdk/devenv
       - --with-lz4=/usr/lib/sdk/devenv
@@ -4193,10 +4087,9 @@ modules:
 
   - name: gnome-epub-thumbnailer-static
     # TODO: should the gdk-pixbuf librsvg loader be statically linked?
-    build-options: *musl-static-build-options
     # TODO: try droping libs after libarchive change
-    make-args:
-      - LIBS+=-llzma -lz -lssl -lcrypto -lzstd -lbz2
+    build-options:
+      cflags: -Wl,-llzma,-lz,-lssl,-lcrypto,-lzstd,-lbz2
     sources:
       - type: archive
         url: https://download.gnome.org/sources/gnome-epub-thumbnailer/1.6/gnome-epub-thumbnailer-1.6.tar.xz
@@ -4209,7 +4102,6 @@ modules:
       - /share/thumbnailers
 
   - name: libsixel-static
-    build-options: *musl-static-build-options
     buildsystem: meson
     config-opts:
       - --default-library=static
@@ -4235,7 +4127,6 @@ modules:
       - /bin/libsixel-config
 
   - name: sic-static
-    build-options: *musl-static-build-options
     buildsystem: simple
     build-commands: *cargo-build-commands
    #build-commands: # binary release (dynamic)
@@ -4292,7 +4183,6 @@ modules:
   ############################
 
   - name: axel-static
-    build-options: *musl-static-build-options
     config-opts:
       - --disable-nls
     sources:
@@ -4308,7 +4198,6 @@ modules:
   - name: bind-static
     # TODO: fix symlink creation in /bin
     # TODO: binaries are broken
-    build-options: *musl-static-build-options
     config-opts:
       - --sbindir=${prefix}/bin
       - --enable-static
@@ -4362,7 +4251,6 @@ modules:
       - '*' # TODO: remove after fixing the module
     modules:
       - name: libnghttp2-static
-        build-options: *musl-static-build-options
         config-opts:
           - --disable-shared
           - --enable-lib-only
@@ -4379,7 +4267,6 @@ modules:
           - '*'
 
   - name: lynx-static
-    build-options: *musl-static-build-options
     config-opts:
       - --disable-nls
       - --with-screen=ncursesw
@@ -4399,7 +4286,6 @@ modules:
       - '*'
 
   - name: mutt-static
-    build-options: *musl-static-build-options
     config-opts:
       # TODO: move mail folder to home
       - --disable-nls
@@ -4447,7 +4333,6 @@ modules:
             -lkrb5_pkinit/' configure
 
   - name: openbsd-netcat-static
-    build-options: *musl-static-build-options
     no-autogen: true
     no-make-install: true
     make-args:
@@ -4477,7 +4362,6 @@ modules:
         path: openbsd-netcat-1.105-musl-b64_ntop.patch
     modules:
       - name: libbsd-static
-        build-options: *musl-static-build-options
         config-opts:
           - --disable-shared
         sources:
@@ -4493,7 +4377,6 @@ modules:
           - '*'
         modules:
           - name: libmd-static
-            build-options: *musl-static-build-options
             config-opts:
               - --disable-shared
             sources:
@@ -4509,7 +4392,6 @@ modules:
               - '*'
 
   - name: socat-static
-    build-options: *musl-static-build-options
     sources:
       - type: archive
         url: http://www.dest-unreach.org/socat/download/socat-1.7.4.3.tar.gz
@@ -4524,7 +4406,6 @@ modules:
           - sed -i '/HAVE_GETPROTOBYNUMBER_R/d' config.h.in
 
   - name: traceroute-static
-    build-options: *musl-static-build-options
     no-autogen: true
     make-install-args:
       - prefix=${FLATPAK_DEST}
@@ -4542,7 +4423,6 @@ modules:
           - sed -i '/call set, \(CC\|CFLAGS\|CPPFLAGS\|LDFLAGS\),/d' Make.rules
 
   - name: whois-static
-    build-options: *musl-static-build-options
     no-autogen: true
     make-install-args:
       - prefix=${FLATPAK_DEST}
@@ -4560,7 +4440,6 @@ modules:
           - sed -i '/install:/ s/ install-pos//' Makefile
 
   - name: wol-static
-    build-options: *musl-static-build-options
     config-opts:
       - --infodir=${prefix}/share/info
       - --mandir=${prefix}/share/man
@@ -4599,7 +4478,6 @@ modules:
   ############################
 
   - name: btop-static
-    build-options: *musl-static-build-options
     no-autogen: true
     make-args:
       - CXX:=$(CXX)
@@ -4622,7 +4500,6 @@ modules:
       - /share/icons
 
   - name: htop-static
-    build-options: *musl-static-build-options
     config-opts:
       # TODO: revisit features
       - --enable-static
@@ -4650,7 +4527,6 @@ modules:
       - /share/pixmaps
 
   - name: psmisc-static
-    build-options: *musl-static-build-options
     config-opts:
       - --disable-nls
     make-args:
@@ -4767,7 +4643,6 @@ modules:
             + "/pyenv-virtualenv-" + $version + ".tar.gz"'
 
   - name: pyflow-static
-    build-options: *musl-static-build-options
     buildsystem: simple
     build-commands: *cargo-build-commands
    #build-commands: # binary release (dynamic)
@@ -4819,7 +4694,6 @@ modules:
           url-template: https://github.com/rfjakob/gocryptfs/releases/download/v$version/gocryptfs_v${version}_linux-static_amd64.tar.gz
 
   - name: gpg-tui-static
-    build-options: *musl-static-build-options
     buildsystem: simple
     build-commands: *cargo-build-commands
    #build-commands: # binary release (dynamic)
@@ -4856,7 +4730,6 @@ modules:
      #    url-template: https://github.com/orhun/gpg-tui/releases/download/v$version/gpg-tui-$version-x86_64-unknown-linux-gnu.tar.gz
 
   - name: paperkey-static
-    build-options: *musl-static-build-options
     sources:
       - type: archive
         url: https://www.jabberwocky.com/software/paperkey/paperkey-1.6.tar.gz
@@ -4868,7 +4741,6 @@ modules:
           url-template: https://www.jabberwocky.com/software/paperkey/paperkey-$version.tar.gz
 
   - name: pwgen-static
-    build-options: *musl-static-build-options
     sources:
       - type: archive
         url: http://downloads.sourceforge.net/pwgen/pwgen-2.08.tar.gz
@@ -4880,7 +4752,6 @@ modules:
           url-template: http://downloads.sourceforge.net/pwgen/pwgen-$version.tar.gz
 
   - name: qrencode-static
-    build-options: *musl-static-build-options
     config-opts:
       - --enable-static
       - --disable-shared
@@ -4903,7 +4774,6 @@ modules:
   ############################
 
   - name: bash-static
-    build-options: *musl-static-build-options
     config-opts:
       - --enable-static-link
       - --enable-readline
@@ -4961,12 +4831,8 @@ modules:
 
   - name: fish-static
     # TODO: fix ncurses detection to avoid cxxflags definition
-   #build-options: *musl-static-build-options
     build-options:
-      cflags: -static -static-pie -fPIC
-      cxxflags: -static -static-pie -fPIC -DHAVE_NCURSES_H -DHAVE_TERM_H
-      ldflags: -static -static-pie -fPIC -Wl,-fuse-ld=mold
-      env: *musl-toolchain-environment
+      cxxflags: -DHAVE_NCURSES_H -DHAVE_TERM_H
     buildsystem: cmake
     config-opts:
       - -DCMAKE_BUILD_TYPE=Release
@@ -5000,7 +4866,6 @@ modules:
 
   - name: zsh-static
     # TODO: check ncurses detection in configure
-    build-options: *musl-static-build-options
     config-opts:
       # TODO: edit config.modules to compile modules
       # sed_i 's/link=no/link=static/' config.modules
@@ -5037,7 +4902,6 @@ modules:
           url-template: https://www.zsh.org/pub/zsh-$version.tar.xz
     modules:
       - name: libcap-static
-        build-options: *musl-static-build-options
         no-autogen: true
         subdir: libcap
         make-args:
@@ -5097,7 +4961,6 @@ modules:
   ############################
 
   - name: libutempter-static
-    build-options: *musl-static-build-options
     no-autogen: true
     make-install-args:
       - libdir=${FLATPAK_DEST}/lib
@@ -5120,7 +4983,6 @@ modules:
             -e '/$(LINK.c)/ s/LINK_PIE/LINK_PIC/' -i Makefile
 
   - name: libxcrypt-static
-    build-options: *musl-static-build-options
     config-opts:
       - --disable-shared
       - --disable-failure-tokens
@@ -5157,7 +5019,6 @@ modules:
       - /share/dbus-1
     modules:
       - name: libnewt-static
-        build-options: *musl-static-build-options
         config-opts:
           - --without-tcl
           - --without-python
@@ -5183,7 +5044,6 @@ modules:
           - /share/locale
         modules:
           - name: gpm-static
-            build-options: *musl-static-build-options
             config-opts:
               - --enable-static
               - --sbindir=${prefix}/bin
@@ -5208,7 +5068,6 @@ modules:
                     s/libgpm.so.@abi_lev@/libgpm.a/' -e '\|^all:| s/libgpm.so//' -e
                     '\|$(CC) @LDFLAGS@| s/\($(CC)\)/\1 @CFLAGS@ $(CFLAGS)/' -i src/Makefile.in
           - name: slang-static
-            build-options: *musl-static-build-options
             no-parallel-make: true
             no-make-install: true
             make-args:
@@ -5229,7 +5088,6 @@ modules:
 
   - name: mosh-static
     # TODO: test if client is working without perl module
-    build-options: *musl-static-build-options
     config-opts:
       - --enable-static
       - --enable-completion
@@ -5268,7 +5126,6 @@ modules:
 #         - .packlist
 #         - '*.pod'
       - name: protobuf-static
-        build-options: *musl-static-build-options
         config-opts:
           - --enable-static
         make-args:
@@ -5293,7 +5150,6 @@ modules:
 
   - name: screen-static
     # TODO: buildsystem tries to install into /usr
-    build-options: *musl-static-build-options
     config-opts:
       # TODO: set pty group?
       - --enable-static
@@ -5312,7 +5168,6 @@ modules:
           url-template: https://ftp.gnu.org/gnu/screen/screen-$version.tar.gz
 
   - name: tmate-static
-    build-options: *musl-static-build-options
     config-opts:
       - --enable-static
     make-args:
@@ -5335,7 +5190,6 @@ modules:
           - sed -i '/^#if defined(HAVE_CURSES_H)/i \#define HAVE_NCURSES_H' tty-term.c
 
   - name: tmux-static
-    build-options: *musl-static-build-options
     config-opts:
       - --enable-static
       - --enable-utempter
@@ -5376,7 +5230,6 @@ modules:
       - moar-go-sources.json # OFFLINE-BUILD, flatpak-go-get-generator.py -o moar-go-sources.json ./
 
   - name: reptyr-static
-    build-options: *musl-static-build-options
     no-autogen: true
     make-install-args:
       - PREFIX=${FLATPAK_DEST}
@@ -5444,7 +5297,6 @@ modules:
   - name: foot-static
     # TODO: add notify-send
     # TODO: investigate coredumps on exit (both wayland and x11)
-    build-options: *musl-static-build-options
     buildsystem: meson
     config-opts:
       - --default-library=static
@@ -5507,7 +5359,6 @@ modules:
     modules:
       - name: ncurses-progs-static # foot terminfo generation doesn't work with runtime's tic
         # TODO: try patching foot buildsystem instead of this
-        build-options: *musl-static-build-options
         no-make-install: true
         config-opts:
           - --without-dlsym
@@ -5536,7 +5387,6 @@ modules:
         cleanup:
           - '*'
       - name: fcft-static
-        build-options: *musl-static-build-options
         buildsystem: meson
         config-opts:
           - --default-library=static
@@ -5566,7 +5416,6 @@ modules:
             cleanup:
               - '*'
       - name: libutf8proc-static
-        build-options: *musl-static-build-options
         buildsystem: cmake
         builddir: true
         sources:
@@ -5582,7 +5431,6 @@ modules:
           - '*'
 
   - name: picocom-static
-    build-options: *musl-static-build-options
     no-autogen: true
     no-make-install: true
     build-commands:
