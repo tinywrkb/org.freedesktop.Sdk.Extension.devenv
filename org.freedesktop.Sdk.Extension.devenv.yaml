@@ -5515,6 +5515,8 @@ modules:
             else
               exec foot-wayland "$@"
             fi
+    cleanup:
+      - /etc
     modules:
       - name: ncurses-progs-static # foot terminfo generation doesn't work with runtime's tic
         # TODO: try patching foot buildsystem instead of this
