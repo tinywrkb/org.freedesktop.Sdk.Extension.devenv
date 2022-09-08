@@ -1645,20 +1645,20 @@ modules:
         buildsystem: meson
         config-opts:
           - --default-library=static
-          - -Dintel=false
-          - -Dradeon=false
-          - -Damdgpu=false
-          - -Dnouveau=false
-          - -Dvmwgfx=false
-          - -Domap=false
-          - -Dexynos=false
-          - -Dfreedreno=false
-          - -Dtegra=false
-          - -Dvc4=false
-          - -Detnaviv=false
-          - -Dcairo-tests=false
-          - -Dman-pages=false
-          - -Dvalgrind=false
+          - -Dintel=disabled
+          - -Dradeon=disabled
+          - -Damdgpu=disabled
+          - -Dnouveau=disabled
+          - -Dvmwgfx=disabled
+          - -Domap=disabled
+          - -Dexynos=disabled
+          - -Dfreedreno=disabled
+          - -Dtegra=disabled
+          - -Dvc4=disabled
+          - -Detnaviv=disabled
+          - -Dcairo-tests=disabled
+          - -Dman-pages=disabled
+          - -Dvalgrind=disabled
           - -Dfreedreno-kgsl=false
           - -Dinstall-test-programs=false
           - -Dudev=false
