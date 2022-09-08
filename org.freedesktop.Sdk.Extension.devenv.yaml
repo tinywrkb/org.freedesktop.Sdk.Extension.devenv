@@ -38,7 +38,7 @@ build-options:
       GOBIN=${FLATPAK_DEST}/bin
       GOPATH=${FLATPAK_BUILDER_BUILDDIR}
       XDG_CACHE_HOME=${FLATPAK_BUILDER_BUILDDIR}/cache
-      GOCACHE=$(if [ -n "$CCACHE_DIR" ]; then echo /run/ccache/gocache; fi;)
+      GOCACHE=$(if [ "$CCACHE_DIR" == "/run/ccache" ]; then echo /run/ccache/gocache; fi;)
     - |
       PYVARS=
       PATH=${FLATPAK_DEST}/python/bin:${PATH}
@@ -147,7 +147,7 @@ modules:
     build-commands:
       - |
         set -e
-        if [ -n "$CCACHE_DIR" ]; then
+        if [ "$CCACHE_DIR" == "/run/ccache" ]; then
           install -dm755 ${FLATPAK_DEST}/bin
           ln -s /usr/bin/ccache ${FLATPAK_DEST}/bin/x86_64-linux-musl-gcc
           ln -s /usr/bin/ccache ${FLATPAK_DEST}/bin/x86_64-linux-musl-g++
