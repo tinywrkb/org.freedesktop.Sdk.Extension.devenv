@@ -1,0 +1,13 @@
+[Unit]
+Description=DevEnv mount service
+ConditionPathExists=%h/.local/devenv/files
+ConditionPathExists=/var/lib/devenv
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=bindfs -o ro %h/.local/devenv/files /var/lib/devenv
+ExecStop=fusermount -u /var/lib/devenv
+
+[Install]
+WantedBy=default.target

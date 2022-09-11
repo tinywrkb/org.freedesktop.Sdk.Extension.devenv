@@ -29,6 +29,9 @@ finish-args:
 # networking
   - --share=network
 
+# devenv
+  - --filesystem=/var/lib/devenv
+
 # code
   - --filesystem=~/projects
   # ccache

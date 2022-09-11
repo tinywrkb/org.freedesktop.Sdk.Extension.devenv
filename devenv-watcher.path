@@ -1,0 +1,20 @@
+[Unit]
+Description=DevEnv path watcher
+ConditionPathExists=%h/.local/devenv
+ConditionPathExists=/var/lib/devenv
+
+[Path]
+# use a symlink to point to the active extension, and avoid
+#  - adding logic to detect which one is the latest revision, system or user extension
+#  - hardcoding branch, arch, full extension name
+#  - possibly adding timestamp in extension to simplify latest detection logic
+PathModified=%h/.local/devenv/deploy
+#PathModified=%h/.local/share/flatpak/runtime/%N/x86_64/22.08/active/deploy
+#PathModified=%h/.local/share/flatpak/runtime/org.freedesktop.Sdk.Extension.devenv/x86_64/22.08/active/deploy
+#PathModified=/apps/runtime/org.freedesktop.Sdk.Extension.devenv/x86_64/22.08/active/deploy
+#Unit=devenv.service
+#StartLimitIntervalSec=
+#StartLimitBurst=
+
+[Install]
+WantedBy=default.target

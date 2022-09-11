@@ -5514,8 +5514,10 @@ modules:
       - ln -s nvim ${FLATPAK_DEST}/bin/vim
       - install -Dm644 bash.bashrc python.startup -t ${FLATPAK_DEST}/etc/
       # install host files
-      - install -Dm644 system-manpages.tempfiles.d ${FLATPAK_DEST}/host/systemd/tmpfiles.d/system-manpages.conf
-      - install -Dm644 system-manpages.user-tmpfiles.d ${FLATPAK_DEST}/host/user-tmpfiles.d/devenv.conf
+      - install -Dm644 devenv{-watcher.{path,service},.service} -t ${FLATPAK_DEST}/host/systemd/user/
+      - install -Dm644 devenv.user-tmpfiles.d ${FLATPAK_DEST}/host/user-tmpfiles.d/devenv.conf
+      - install -Dm644 system-manpages.tempfiles.d ${FLATPAK_DEST}/host/tmpfiles.d/system-manpages.conf
+      - install -Dm644 system-manpages.user-tmpfiles.d ${FLATPAK_DEST}/host/user-tmpfiles.d/system-manpages.conf
     sources:
       - type: script
         dest-filename: enable.sh
@@ -5596,6 +5598,14 @@ modules:
         path: inputrc
       - type: file
         path: python.startup
+      - type: file
+        path: devenv-watcher.path
+      - type: file
+        path: devenv-watcher.service
+      - type: file
+        path: devenv.service
+      - type: file
+        path: devenv.user-tmpfiles.d
       - type: file
         path: system-manpages.tempfiles.d
       - type: file
