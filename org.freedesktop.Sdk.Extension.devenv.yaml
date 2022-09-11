@@ -5513,6 +5513,9 @@ modules:
         enable-development-environment ssh
       - ln -s nvim ${FLATPAK_DEST}/bin/vim
       - install -Dm644 bash.bashrc python.startup -t ${FLATPAK_DEST}/etc/
+      # install host files
+      - install -Dm644 system-manpages.tempfiles.d ${FLATPAK_DEST}/host/systemd/tmpfiles.d/system-manpages.conf
+      - install -Dm644 system-manpages.user-tmpfiles.d ${FLATPAK_DEST}/host/user-tmpfiles.d/devenv.conf
     sources:
       - type: script
         dest-filename: enable.sh
@@ -5593,3 +5596,7 @@ modules:
         path: inputrc
       - type: file
         path: python.startup
+      - type: file
+        path: system-manpages.tempfiles.d
+      - type: file
+        path: system-manpages.user-tmpfiles.d

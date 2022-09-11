@@ -76,15 +76,7 @@ finish-args:
   #- --filesystem=xdg-config/lesskey:ro #
 # man
   # this works because .local/bin is in PATH
-  # user-tmpfiles.d/system-manpages.conf
-    # d %t/manpages 0700 - - - -
-    # L+ %h/.local/share/man - - - - %t/manpages
-    # C+ %t/manpages/man1 0700 - - - /usr/share/man/man1
-    # C+ %t/manpages/man1p 0700 - - - /usr/share/man/man1p
-    # C+ %t/manpages/man4 0700 - - - /usr/share/man/man4
-    # C+ %t/manpages/man5 0700 - - - /usr/share/man/man5
-    # C+ %t/manpages/man7 0700 - - - /usr/share/man/man7
-    # C+ %t/manpages/man8 0700 - - - /usr/share/man/man8
+  # for more details, see tmpfiles.d configs packaged with the extension
   - --filesystem=xdg-data/man
 # neovim
   - --filesystem=xdg-config/nvim:ro
