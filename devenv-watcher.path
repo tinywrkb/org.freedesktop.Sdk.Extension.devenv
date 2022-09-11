@@ -1,6 +1,6 @@
 [Unit]
 Description=DevEnv path watcher
-ConditionPathExists=%h/.local/devenv
+ConditionPathIsSymbolicLink=%h/.local/devenv
 ConditionPathExists=/var/lib/devenv
 
 [Path]

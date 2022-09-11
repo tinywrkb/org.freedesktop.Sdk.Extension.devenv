@@ -1,12 +1,12 @@
 [Unit]
 # this is needed as systemd unit path doesn't handle restarts
 Description=DevEnv watcher service
-ConditionPathExists=%h/.local/devenv
+ConditionPathIsSymbolicLink=%h/.local/devenv
 ConditionPathExists=/var/lib/devenv
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/systemctl restart --user devenv.service
+ExecStart=/usr/bin/sh -c 'while [ ! -f %h/.local/devenv/deploy ]; do sleep 0.1; done; /usr/bin/systemctl restart --user devenv.service;'
 
 [Install]
 WantedBy=default.target
