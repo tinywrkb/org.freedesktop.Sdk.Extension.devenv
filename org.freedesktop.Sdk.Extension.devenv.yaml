@@ -2764,20 +2764,38 @@ modules:
           stable-only: true
           url-template: https://github.com/sharkdp/bat/releases/download/v$version/bat-v$version-x86_64-unknown-linux-musl.tar.gz
 
-  - name: difftastic-shared-bin
+  - name: difftastic-static
     buildsystem: simple
-    build-commands:
-      - install -Dm755 difft -t ${FLATPAK_DEST}/bin/
+    build-commands: *cargo-build-commands
+   #build-commands: # binary release (dynamic)
+   #  - install -Dm755 difft -t ${FLATPAK_DEST}/bin/
+    post-install:
+      - install -Dm755 target/x86_64-unknown-linux-musl/release/difft -t ${FLATPAK_DEST}/bin/
     sources:
       - type: archive
-        strip-components: 0
-        url: https://github.com/Wilfred/difftastic/releases/download/0.35.0/difft-x86_64-unknown-linux-gnu.tar.gz
-        sha256: cc475bc94db44c59bd394e36694247560c4ab4b69b4d32902ff61012146eb323
+        url: https://github.com/Wilfred/difftastic/archive/0.35.0/difftastic-0.35.0.tar.gz
+        sha256: dfb800324c7fa329f24fa23b37dbbd63c2069a063d84ae5e7b569c82af7ef9bf
         x-checker-data:
           type: anitya
           project-id: 279512
           stable-only: true
-          url-template: https://github.com/Wilfred/difftastic/releases/download/$version/difft-x86_64-unknown-linux-gnu.tar.gz
+          url-template: https://github.com/Wilfred/difftastic/archive/$version/difftastic-$version.tar.gz
+      - type: patch
+        path: difftastic-static.patch
+      - difftastic-cargo-sources.json # flatpak-cargo-generator.py Cargo.lock -t -o difftastic-cargo-sources.json
+      - type: file
+        dest: .cargo
+        dest-filename: config
+        path: difftastic-cargo-config
+     #- type: archive # binary release (dynamic)
+     #  strip-components: 0
+     #  url: https://github.com/Wilfred/difftastic/releases/download/0.35.0/difft-x86_64-unknown-linux-gnu.tar.gz
+     #  sha256: cc475bc94db44c59bd394e36694247560c4ab4b69b4d32902ff61012146eb323
+     #  x-checker-data:
+     #    type: anitya
+     #    project-id: 279512
+     #    stable-only: true
+     #    url-template: https://github.com/Wilfred/difftastic/releases/download/$version/difft-x86_64-unknown-linux-gnu.tar.gz
 
   - name: highlight-static
     no-autogen: true
