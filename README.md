@@ -47,26 +47,22 @@ as there are a good number of git sources here.
 
 ## TODO
 * helper scripts
-  * add enable-sdks.sh
   * flatpak-builder like env vars
   * set local installation targets: python, golang, rust
     node: NPM_PACKAGES=xdg-data/npm-packages
           PATH+=:xdg-data/npm-packages/bin
-* add more patched fonts: nerd-fonts
-* investigate broken host tmux sessions
-* add tarball generation script
-* test portability, needs to work when switching to /var/lib
-* investigate the possiblity to keep extension accessible after update
-* see other useful tools @ https://github.com/agarrharr/awesome-cli-apps
-* drop musl shared lib, move next to users
-* deal better with overriden HOME and XDG user dirs variables
 * read envvar to select shell (default to bash)
-* evaluate building golang and rust modules from source
-  * prioritize shared linked: difftastic
-* evaluate setting default flags
-  * hardening: stack protection, fortify source, ...
-  * golang: static-pie, `-extldflags="--static-pie"`
-* golang: ask upstream to build static-pie releases
+* test portability, needs to work when switching to /var/lib
+* deal better with overriden HOME and XDG user dirs variables
+* add more patched fonts: nerd-fonts
+* investigate possible broken host tmux sessions
+* drop musl shared lib, move next to users, maybe loader link can be relative
+* evaluate building all golang and rust modules from source
+* golang
+  * ask upstream for static-pie binaries
+  * compile from source: static-pie, `-extldflags="--static-pie"`
+  * disable cgo where it's possible
+  * test mold with cgo apps
 * modules to add
   * iso manipulation tools: cdrtools, fuseiso
   * filesystems fuse tools: at least for dos/fat, ext2/3/4, overlayfs
@@ -74,34 +70,13 @@ as there are a good number of git sources here.
   * fonts for terminal emulator: noto-vf
   * debugging tools: gdb, valgrind
 * choose a better extension name
-* move to a dedicated repo and add ci to build and publish via oci registry
-* test mold with cgo apps
-* explictly disable cgo where it's possible
-
-### possible failure mapping of sdk path
-* stow: hardcoded perl `use dir`, can be patched
-* luajit: dynamically linked bindings, not sure if working
-* luajit: dynamically linked bindings, check if symlink to libc can be drop into same folder
-* luajit: dynamically linked bindings, try again to statically link against libc, but keep shared
-* luajit: keep bindings
-* libutempter: "libexec"
-* kakoune: "libexec", strange one, links to bin, try droping this
-* luajit: bindings are in lib, very likely hardcoded path
-* byobu: lib execs, check if relative to executable
-* running apps might try to access sdk path when they should switch to /var/lib: byobu, neovim
-* byobu: etc defaults
-* etc/profile.d: can be dropped?
-* vimfm: default colors in /etc
-* wtf put group, machineid, passwd, resolv.conf in etc?
-* share: byobu, fish, fzf, kak, kak-lsp, luajit, nnn, nvim, pyenv, ugrep, vifm, vim, zsh
-
+* add ci to build and publish via oci registry
+* see other useful tools @ https://github.com/agarrharr/awesome-cli-apps
 
 ## How to
 
-**This a bit of ill-formatted mess, sorry.**
-
 * fontconfig
-  * add to fonts.conf see flatpaks README.md
+  * add to fonts.conf see [flatpaks README.md](https://github.com/tinywrkb/flatpaks/blob/master/README.md)
   * now: `<dir>/usr/lib/sdk/devenv/share/fonts/powerline</dir>`
   * next: `<dir prefix="xdg">fonts/powerline</dir>`
   * Reference: [fontconfig: Add support for XDG_DATA_DIRS](https://gitlab.freedesktop.org/fontconfig/fontconfig/-/commit/6f27f42e6140030715075aa3bd3e5cc9e2fdc6f1)
@@ -124,21 +99,6 @@ as there are a good number of git sources here.
   * add persist override:  `$ flatpak override --user --persist=. FLATPAK_ID`
   * enter sandbox: `$ flatpak run FLATPAK_ID`
   * create .bashrc: `$ echo 'source $ENABLE_DEVENV' > .bashrc`
-
-* terminfo: use updated db
-  * optional as it's already set by the enable.sh script
-  * if added to an app packaging, must use quotes like the example
-    ```
-    - '--env=TERMINFO_DIRS=/usr/lib/sdk/devenv/share/terminfo:'
-    ```
-
-* ssh
-  * when using non-default ssh config folder, explictly set IdentityFile
-    ```
-    Host *
-      IdentityFile ~/.config/ssh/id_rsa
-      IdentityFile ...
-    ```
 
 * fish: possible workarounds for hardcoded paths
   ```

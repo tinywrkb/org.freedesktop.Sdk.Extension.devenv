@@ -102,11 +102,18 @@ finish-args:
   # TODO: this should be already enabled in recent flatpak releases, check the code
   # this might be already enabled, it only beeing used by gnome-keyring's agent, and basically bind mounts bind-mounts the xdg-run/ssh-auth
   - --socket=ssh-auth
+  # when using a non-default config folder you should explicitly set IdentityFile in the config
+  #   Host *
+  #     IdentityFile ~/.config/ssh/id_rsa
+  #     IdentityFile ...
 # terminal multiplexer
   # byobu
   #- --filesystem=xdg-config/byobu/.ssh-agent
   # tmux
   #- --filesystem=xdg-run/tmux
+# terminfo: use updated db
+  # disabled as it's already set by the enable.sh script, but kept here for documentation
+  #- '--env=TERMINFO_DIRS=/usr/lib/sdk/devenv/share/terminfo:'
 
 
 modules:
