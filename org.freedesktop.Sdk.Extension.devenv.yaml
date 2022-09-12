@@ -4897,8 +4897,6 @@ modules:
   - name: zsh-static
     # TODO: check ncurses detection in configure
     config-opts:
-      # TODO: edit config.modules to compile modules
-      # sed_i 's/link=no/link=static/' config.modules
       - --enable-libc-musl
       - --disable-dynamic
       - --docdir=${FLATPAK_DEST}/share/doc/zsh
@@ -4915,9 +4913,9 @@ modules:
       - --enable-fndir=${FLATPAK_DEST}/share/zsh/functions
       - --enable-scriptdir=${FLATPAK_DEST}/share/zsh/scripts
       - --with-tcsetpgrp
-#     - --enable-pcre
-#     - --enable-cap
-#     - --enable-zsh-secure-free
+      - --enable-pcre
+      - --enable-cap
+      - --enable-zsh-secure-free
     post-install:
      # unneeded filesystem (mv) operations on ${FLATPAK_DEST}/bin/zsh breaks rofiles, overwriting the file fix this
       - install -Dm755 ${FLATPAK_DEST}/bin/zsh{-*,}
@@ -4930,6 +4928,10 @@ modules:
           project-id: 5307
           stable-only: true
           url-template: https://www.zsh.org/pub/zsh-$version.tar.xz
+      - type: file
+        # NOTE: this should be updated at on every major release
+        dest-filename: config.modules
+        path: zsh-config.modules
     modules:
       - name: libcap-static
         no-autogen: true
@@ -4951,6 +4953,9 @@ modules:
               project-id: 1569
               stable-only: true
               url-template: https://kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-$version.tar.xz
+          - type: shell
+            commands:
+              - sed -i '/^\(CC\|LD\|AR\) :=/d' Make.Rules
 
   - name: powerline-fonts
     # TODO: generate updated patched fonts with https://github.com/powerline/fontpatcher
