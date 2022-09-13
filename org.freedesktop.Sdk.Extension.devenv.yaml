@@ -5572,7 +5572,6 @@ modules:
               }
               set_devenv_prefix
 
-
               export PATH=${DEVENV_PREFIX}/bin:${PATH}
               if [ -f "/.flatpak-info" ]; then
                 export PATH=${DEVENV_PREFIX}/bin/fsw:${PATH}
@@ -5581,20 +5580,30 @@ modules:
               #if [ -z "${LD_LIBRARY_PATH}" ]; then
               #  export LD_LIBRARY_PATH=${DEVENV_PREFIX}/lib
               #else
-              #  export LD_LIBRARY_PATH+=:${DEVENV_PREFIX}/lib
+              #  export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${DEVENV_PREFIX}/lib
               #fi
               #if [ -z "${PYTHONPATH}" ]; then
               #  export PYTHONPATH=${DEVENV_PREFIX}/lib/python/site-packages
               #else
-              #  export PYTHONPATH+=:${DEVENV_PREFIX}/lib/python/site-packages
+              #  export PYTHONPATH=${PYTHONPATH}:${DEVENV_PREFIX}/lib/python/site-packages
               #fi
-              if [[ ":${TERMINFO_DIRS}:" != *":${DEVENV_PREFIX}/share/terminfo:"* ]]; then
-                if [[ "${TERMINFO_DIRS}" != *":" ]] && [ -n "${TERMINFO_DIRS}" ]; then
-                  export TERMINFO_DIRS+=":${DEVENV_PREFIX}/share/terminfo:"
-                else
-                  export TERMINFO_DIRS+="${DEVENV_PREFIX}/share/terminfo:"
-                fi
-              fi
+
+              # do nothing if TERMINFO_DIRS is already set
+              case ":${TERMINFO_DIRS}:" in
+                *":${DEVENV_PREFIX}/share/terminfo:"*)
+                  :
+                  ;;
+                *)
+                  # not empty and not already have colon at the end
+                  if [ -n "${TERMINFO_DIRS}" ] && [ -n "${TERMINFO_DIRS##*:}" ]; then
+                    export TERMINFO_DIRS="${TERMINFO_DIRS}:${DEVENV_PREFIX}/share/terminfo:"
+                  else
+                    # if not empty then it alrady has colon, no need to add it between
+                    export TERMINFO_DIRS="${TERMINFO_DIRS}${DEVENV_PREFIX}/share/terminfo:"
+                  fi
+              esac
+
+
               # symlinks adjustments for xdg user dirs locations
               if [ -f "/.flatpak-info" ]; then
                   # single level xdg-dir
