@@ -52,6 +52,10 @@ set_devenv_prefix(){
     else
       2>&1 echo "ERROR: Cannot detect DEVENV_PREFIX! This should not happen!"
     fi
+  elif [ ! -f "${DEVENV_PREFIX}/enable.sh" ]; then
+    2>&1 echo "ERROR: Cannot locate enable.sh in DEVENV_PREFIX, unsetting DEVENV_PREFIX!"
+    unset DEVENV_PREFIX
+    set_devenv_prefix
   fi
 }
 set_devenv_prefix
