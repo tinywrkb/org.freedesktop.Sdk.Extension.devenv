@@ -46,12 +46,6 @@ as there are a good number of git sources here.
 
 ## Tips
 
-* Fontconfig
-  * Add to `fonts.conf` see [flatpaks README.md](https://github.com/tinywrkb/flatpaks/blob/master/README.md)
-  * now: `<dir>/usr/lib/sdk/devenv/share/fonts/powerline</dir>`
-  * next: `<dir prefix="xdg">fonts/powerline</dir>`
-  * Reference: [fontconfig: Add support for XDG_DATA_DIRS](https://gitlab.freedesktop.org/fontconfig/fontconfig/-/commit/6f27f42e6140030715075aa3bd3e5cc9e2fdc6f1)
-
 * Set default shell
   * Set `DEVENV_SHELL` variable in the host environment or as Flatpak override one of the packaged shell
 
