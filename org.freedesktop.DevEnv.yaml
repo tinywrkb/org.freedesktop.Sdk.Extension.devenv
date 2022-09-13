@@ -114,7 +114,10 @@ finish-args:
 # terminfo: use updated db
   # disabled as it's already set by the enable.sh script, but kept here for documentation
   #- '--env=TERMINFO_DIRS=/usr/lib/sdk/devenv/share/terminfo:'
-
+# zsh
+  - --filesystem=xdg-cache/zsh
+  - --filesystem=xdg-config/zsh:ro
+  - --filesystem=xdg-data/zsh:ro
 
 modules:
   - name: devenv
@@ -125,5 +128,5 @@ modules:
       - type: script
         dest-filename: devenv
         commands:
-          - source /usr/lib/sdk/devenv/bin/enable-development-environment
+          - source /usr/lib/sdk/devenv/bin/enable-devenv
           - exec bash
