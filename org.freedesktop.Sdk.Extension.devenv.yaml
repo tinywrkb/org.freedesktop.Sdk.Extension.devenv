@@ -5538,7 +5538,7 @@ modules:
       - install -Dm755 enable.sh -t ${FLATPAK_DEST}/
       - |
         install -Dm755 -t ${FLATPAK_DEST}/bin/ \
-        enable-development-environment ssh
+        enable-devenv ssh
       - install -Dm644 bash.bashrc python.startup -t ${FLATPAK_DEST}/etc/
       # install host files
       - install -Dm644 devenv{-watcher.{path,service},.service} -t ${FLATPAK_DEST}/host/systemd/user/
@@ -5576,8 +5576,7 @@ modules:
                 fi
               fi
               # symlinks adjustments for xdg user dirs locations
-              if [ -n "$FLATPAK_ID" ] &&
-                [ -e "/.flatpak-info" ]; then
+              if [ -e "/.flatpak-info" ]; then
                   # single level xdg-dir
                   # target: .user/dots
                   # source: xdg-config/symlink
@@ -5601,7 +5600,7 @@ modules:
               touch '/etc/shells'
             fi
       - type: script
-        dest-filename: enable-development-environment
+        dest-filename: enable-devenv
         commands:
           - |
             if [ -z "$FLATPAK_DEVELOPMENT_ENVIRONMENT" ]; then
