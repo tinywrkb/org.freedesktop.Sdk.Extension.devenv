@@ -5550,48 +5550,68 @@ modules:
         dest-filename: enable.sh
         commands:
           - |
-            if [ -z "$FLATPAK_DEVELOPMENT_ENVIRONMENT" ]; then
-              export FLATPAK_DEVELOPMENT_ENVIRONMENT=1
-              SDKPATH=/usr/lib/sdk/devenv
-              export PATH=${SDKPATH}/bin:$PATH
+            if [ -z "${DEVENV_ENABLED}" ]; then
+              export DEVENV_ENABLED=1
+
+              # only change prefix if not set already
+              # prefer statedir path as sdk path break on update
+              set_devenv_prefix(){
+                local devenv_libsdk=/usr/lib/sdk/devenv
+                local devenv_varlib=/var/lib/devenv
+                if [ -z "${DEVENV_PREFIX}" ]; then
+                  if [ -f "/.flatpak-info" ] &&
+                    [ -n "${DEVENV_PREFIX_SDK}" ] &&
+                    [ -f "${devenv_libsdk}/enable.sh" ]; then
+                    export DEVENV_PREFIX=${devenv_libsdk}
+                  elif [ -f "${devenv_varlib}/enable.sh" ]; then
+                    export DEVENV_PREFIX=${devenv_varlib}
+                  else
+                    2>&1 echo "ERROR: Cannot detect DEVENV_PREFIX! This should not happen!"
+                  fi
+                fi
+              }
+              set_devenv_prefix
+
+
+              export PATH=${DEVENV_PREFIX}/bin:${PATH}
               if [ -f "/.flatpak-info" ]; then
-                export PATH=${SDKPATH}/bin/fsw:$PATH
+                export PATH=${DEVENV_PREFIX}/bin/fsw:${PATH}
               fi
-              export XDG_DATA_DIRS=$XDG_DATA_DIRS:${SDKPATH}/share
-              #if [ -z "$LD_LIBRARY_PATH" ]; then
-              #  export LD_LIBRARY_PATH=${SDKPATH}/lib
+              export XDG_DATA_DIRS=${XDG_DATA_DIRS}:${DEVENV_PREFIX}/share
+              #if [ -z "${LD_LIBRARY_PATH}" ]; then
+              #  export LD_LIBRARY_PATH=${DEVENV_PREFIX}/lib
               #else
-              #  export LD_LIBRARY_PATH+=:${SDKPATH}/lib
+              #  export LD_LIBRARY_PATH+=:${DEVENV_PREFIX}/lib
               #fi
-              #if [ -z "$PYTHONPATH" ]; then
-              #  export PYTHONPATH=${SDKPATH}/lib/python/site-packages
+              #if [ -z "${PYTHONPATH}" ]; then
+              #  export PYTHONPATH=${DEVENV_PREFIX}/lib/python/site-packages
               #else
-              #  export PYTHONPATH+=:${SDKPATH}/lib/python/site-packages
+              #  export PYTHONPATH+=:${DEVENV_PREFIX}/lib/python/site-packages
               #fi
-              if [[ ":$TERMINFO_DIRS:" != *":${SDKPATH}/share/terminfo:"* ]]; then
-                if [[ "$TERMINFO_DIRS" != *":" ]] && [ -n "$TERMINFO_DIRS" ]; then
-                  export TERMINFO_DIRS+=":${SDKPATH}/share/terminfo:"
+              if [[ ":${TERMINFO_DIRS}:" != *":${DEVENV_PREFIX}/share/terminfo:"* ]]; then
+                if [[ "${TERMINFO_DIRS}" != *":" ]] && [ -n "${TERMINFO_DIRS}" ]; then
+                  export TERMINFO_DIRS+=":${DEVENV_PREFIX}/share/terminfo:"
                 else
-                  export TERMINFO_DIRS+="${SDKPATH}/share/terminfo:"
+                  export TERMINFO_DIRS+="${DEVENV_PREFIX}/share/terminfo:"
                 fi
               fi
               # symlinks adjustments for xdg user dirs locations
-              if [ -e "/.flatpak-info" ]; then
+              if [ -f "/.flatpak-info" ]; then
                   # single level xdg-dir
                   # target: .user/dots
                   # source: xdg-config/symlink
-                  # test from sandbox: $ readlink -m $XDG_CONFIG_HOME/symlink
-                  if [ -d "$HOME/.var/app/${FLATPAK_ID}" ] &&
-                    [ ! -e "$HOME/.var/app/${FLATPAK_ID}/.user" ]; then
-                    ln -s ../../../.user "$HOME/.var/app/${FLATPAK_ID}/.user"
+                  # test from sandbox: $ readlink -m ${XDG_CONFIG_HOME}/symlink
+                  if [ -d "${HOME}/.var/app/${FLATPAK_ID}" ] &&
+                    [ ! -e "${HOME}/.var/app/${FLATPAK_ID}/.user" ]; then
+                    ln -s ../../../.user "${HOME}/.var/app/${FLATPAK_ID}/.user"
                   fi
                   # two levels xdg-dir (just xdg-data)
                   # target: .user/bin/flatpak-run-cli
                   # symlink: xdg-data/flatpak-run-cli/exports/bin/symlink
-                  # test from sandbox: $ readlink -m $XDG_DATA_HOME/flatpak-run-cli/exports/bin/symlink
-                  if [ -d "$HOME/.var/app" ] &&
-                    [ ! -e "$HOME/.var/app/.user" ]; then
-                    ln -s ../../.user "$HOME/.var/app/.user"
+                  # test from sandbox: $ readlink -m ${XDG_DATA_HOME}/flatpak-run-cli/exports/bin/symlink
+                  if [ -d "${HOME}/.var/app" ] &&
+                    [ ! -e "${HOME}/.var/app/.user" ]; then
+                    ln -s ../../.user "${HOME}/.var/app/.user"
                   fi
               fi
             fi
@@ -5603,7 +5623,7 @@ modules:
         dest-filename: enable-devenv
         commands:
           - |
-            if [ -z "$FLATPAK_DEVELOPMENT_ENVIRONMENT" ]; then
+            if [ -z "${DEVENV_ENABLED}" ]; then
               source /usr/lib/sdk/devenv/enable.sh
               # workaround for not running as login shell
               SHELL=$(which bash) exec bash -i

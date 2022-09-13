@@ -56,14 +56,14 @@ as there are a good number of git sources here.
   * Set `DEVENV_SHELL` variable in the host environment or as Flatpak override one of the packaged shell
 
 * Easily enable extension and enter shell
-  * Set this variable in the host environment: `ENABLE_DEVENV=/usr/lib/sdk/devenv/bin/enable-devenv`
-  * Enter a sandbox: `$ flatpak run --command=$ENABLE_DEVENV --devel APPID`
+  * Set this variable in the host environment: `DEVENV_EXEC=/usr/lib/sdk/devenv/bin/enable-devenv`
+  * Enter a sandbox: `$ flatpak run --command=$DEVENV_EXEC --devel APPID`
   * Note that the runtime branch of the application must match or be based on the same Freedesktop branch of the extension
 
 * Automatically enable extension and enter shell
   * Add persist override:  `$ flatpak override --user --persist=. APPID`
   * Enter the sandbox: `$ flatpak run --devel APPID`
-  * Create .bashrc: `$ echo 'source $ENABLE_DEVENV' > .bashrc`
+  * Create .bashrc: `$ echo 'source $DEVENV_EXEC' > .bashrc`
   * Notes
     * As the previous, runtime branch must match
     * Only works with actual apps, not runtimes

@@ -11,7 +11,8 @@
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
-set_devenv_path(){
+# TODO: drop this
+set_devenv_prefix_dynamic(){
   # BASH_SOURCE is actually an array
   local bash_source_path="$(realpath "${BASH_SOURCE}")"
   #local bash_source_basedir="$(dirname "${bash_source_path}")"
@@ -35,7 +36,25 @@ set_devenv_path(){
     DEVENV_PREFIX="${devenv_libsdk}"
   fi
 }
-set_devenv_path
+#set_devenv_prefix_dynamic
+
+set_devenv_prefix(){
+  local devenv_libsdk=/usr/lib/sdk/devenv
+  local devenv_varlib=/var/lib/devenv
+
+  if [ -z "${DEVENV_PREFIX}" ]; then
+    if [ -f "/.flatpak-info" ] &&
+      [ -n "${DEVENV_PREFIX_SDK}" ] &&
+      [ -f "${devenv_libsdk}/enable.sh" ]; then
+      export DEVENV_PREFIX=${devenv_libsdk}
+    elif [ -f "${devenv_varlib}/enable.sh" ]; then
+      export DEVENV_PREFIX=${devenv_varlib}
+    else
+      2>&1 echo "ERROR: Cannot detect DEVENV_PREFIX! This should not happen!"
+    fi
+  fi
+}
+set_devenv_prefix
 
 shopt -s nullglob extglob
 

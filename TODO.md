@@ -1,11 +1,8 @@
 # TODO
 
-* default to /var/lib
-* improve enable.sh
-  * read envvar DEVENV_SHELL to select shell (default to bash)
-  * default to using /var/lib
-  * set global XDG workaround instead of bashrc
-* only override HOME and XDG user dirs variables in wrapper scripts
+* fish: fix vendor sourcing
+* fish: source the correct config.fish
+* fish: possibly patch `__fish_build_paths.fish`
 * enable-sdk
 * Remove how-to section
 * possible failure mapping of sdk path
