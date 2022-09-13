@@ -43,7 +43,7 @@ set_devenv_prefix(){
   local devenv_varlib=/var/lib/devenv
 
   if [ -z "${DEVENV_PREFIX}" ]; then
-    if is_flatpak &>/dev/null &&
+    if [ -f "/.flatpak-info" ] &&
       [ -n "${DEVENV_PREFIX_SDK}" ] &&
       [ -f "${devenv_libsdk}/enable.sh" ]; then
       export DEVENV_PREFIX=${devenv_libsdk}
