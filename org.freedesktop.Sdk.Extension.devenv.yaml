@@ -2492,6 +2492,7 @@ modules:
 
   - name: neovim-static
     # TODO: add python-pynvim in venv after keeping python packaged
+    # TODO: try completely dropping lua
     config-opts:
       - -DCMAKE_BUILD_TYPE=RelWithDebInfo
       # wrong detection of msgpack set this to /usr/include
@@ -2500,10 +2501,8 @@ modules:
       - -DENABLE_LIBICONV=OFF
     buildsystem: cmake-ninja
     builddir: true
-    cleanup:
-      - /share/applications
-      - /share/icons
-      - /share/pixmaps
+    post-install:
+      - ln -s nvim ${FLATPAK_DEST}/bin/vim
     sources:
       - type: archive
         url: https://github.com/neovim/neovim/archive/v0.7.2/neovim-0.7.2.tar.gz
@@ -2518,6 +2517,10 @@ modules:
           # detection of runtime libs adds -I/usr/include before toolchain headers
           - sed -i '/^include_directories.*config/i include_directories("/usr/lib/sdk/musl/x86_64-linux-musl/include")'
             CMakeLists.txt
+    cleanup:
+      - /share/applications
+      - /share/icons
+      - /share/pixmaps
     modules:
       - name: libluv-static
         # TODO: move this to libraries section, common dependency with bind
@@ -5036,6 +5039,8 @@ modules:
       - '*'
 
   - name: byobu
+    post-install:
+      - ln -s byobu ${FLATPAK_DEST}/bin/b
     sources:
       - type: archive
         url: https://launchpad.net/byobu/trunk/5.133/+download/byobu_5.133.orig.tar.gz
@@ -5534,7 +5539,6 @@ modules:
       - |
         install -Dm755 -t ${FLATPAK_DEST}/bin/ \
         enable-development-environment ssh
-      - ln -s nvim ${FLATPAK_DEST}/bin/vim
       - install -Dm644 bash.bashrc python.startup -t ${FLATPAK_DEST}/etc/
       # install host files
       - install -Dm644 devenv{-watcher.{path,service},.service} -t ${FLATPAK_DEST}/host/systemd/user/
