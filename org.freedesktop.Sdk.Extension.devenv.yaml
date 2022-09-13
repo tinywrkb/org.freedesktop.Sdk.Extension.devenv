@@ -5632,8 +5632,25 @@ modules:
         dest-filename: enable-devenv
         commands:
           - |
+            # simple enable.sh locating logic that should affect setting the correct prefix
+            get_devenv_auto_prefix(){
+              local devenv_prefix
+              local process_path="$(realpath "${0}")"
+              local devenv_libsdk=/usr/lib/sdk/devenv
+              local devenv_varlib=/var/lib/devenv
+
+              if [ -r "${process_path}" ] &&
+                [ -r "${process_path%/*/*}/enable.sh" ]; then
+                devenv_prefix="${process_path%/*/*}"
+              elif [ -f "/.flatpak-info" ]; then
+                devenv_prefix="${devenv_libsdk}"
+              else
+                devenv_prefix="${devenv_varlib}"
+              fi
+              echo "${devenv_prefix}"
+            }
             if [ -z "${DEVENV_ENABLED}" ]; then
-              source /usr/lib/sdk/devenv/enable.sh
+              source "$(get_devenv_auto_prefix)/enable.sh"
               # workaround for not running as login shell
               SHELL=$(which bash) exec bash -i
             fi
