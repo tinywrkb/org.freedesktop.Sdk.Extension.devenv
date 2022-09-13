@@ -297,6 +297,10 @@ which nvim &>/dev/null && export EDITOR=nvim
 
 # NOTE: prefer setting aliases in XDG_CONFIG_HOME/bash/bashrc
 
+alias bash='SHELL=$(which bash) bash'
+alias fish='SHELL=$(which fish) fish'
+alias zsh='SHELL=$(which zsh) zsh'
+
 ################################################################################
 ###########################   XDG dirs workarounds  ############################
 ################################################################################
