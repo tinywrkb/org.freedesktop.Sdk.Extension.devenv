@@ -13,7 +13,7 @@ It should be noted that [a running Flatpak instance will lose a mounted extensio
 For that reason, and to support re-use of this with other containers, an alternative root path `/var/lib/devenv` will
 also be supported.
 
-An example application, `org.freedesktop.DevEnv`, is used to create a Flatpak instance, with this SDK extension enabled,
+An example application, `org.freedesktop.DevEnv`, is used to create a Flatpak instance with this SDK extension enabled,
 but the extension is mainly intended to be used with Flatpak packaged IDEs.
 
 
