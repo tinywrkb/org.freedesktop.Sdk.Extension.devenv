@@ -43,7 +43,7 @@ set_devenv_prefix(){
   local devenv_varlib=/var/lib/devenv
 
   if [ -z "${DEVENV_PREFIX}" ]; then
-    if [ -f "/.flatpak-info" ] &&
+    if is_flatpak &>/dev/null &&
       [ -n "${DEVENV_PREFIX_SDK}" ] &&
       [ -f "${devenv_libsdk}/enable.sh" ]; then
       export DEVENV_PREFIX=${devenv_libsdk}
@@ -107,10 +107,12 @@ try_source "${XDG_CONFIG_HOME}"/bash/bash.functions ||
 try_source "${DEVENV_PREFIX}/enable.sh"
 
 is_flatpak() {
-  if [ -f /.flatpak-info ]; then
+  if [ -f "/.flatpak-info" ]; then
     echo "Yes! Running ${FLATPAK_ID}"
+    return 0
   else
-    echo 'No!'
+    echo "No! Not Running in a Flatpak sandbox"
+    return 1
   fi
 }
 
@@ -147,11 +149,15 @@ try_source /usr/share/git/completion/git-prompt.sh &&
   PS1='[\u@\h \W$(__git_ps1 " (%s)")]\$ '
 
 # powerline-go
+if is_flatpak &>/dev/null; then
+  PLGO_EXTRA_OPTIONS='-shell-var FLATPAK_ID'
+fi
+
 function _update_ps1() {
   # save return value as a workaround to it being swallowed by pyenv init
   ret=$?
   _cdw_pyenv_root_update
-  PS1="$($(exit ${ret}); powerline-go -error $? -jobs $(jobs -p | wc -l) -shell-var FLATPAK_ID -numeric-exit-codes -modules venv,user,shell-var,ssh,cwd,perms,git,jobs,exit,root)"
+  PS1="$($(exit ${ret}); powerline-go -error $? -jobs $(jobs -p | wc -l) -numeric-exit-codes ${PLGO_EXTRA_OPTIONS} -modules venv,user,shell-var,ssh,cwd,perms,git,jobs,exit,root)"
 }
 
 # pyenv shell integration
