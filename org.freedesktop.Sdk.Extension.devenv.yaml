@@ -3812,8 +3812,24 @@ modules:
           --collect-all chardet \
           --collect-all six \
           ranger-portable
+      - patchelf --set-interpreter ./libc.musl-x86_64.so.1 dist/ranger-portable/ranger-portable
       - cp -r dist/ranger-portable ${FLATPAK_DEST}/lib/
-      - ln -s ../lib/ranger-portable/ranger-portable ${FLATPAK_DEST}/bin/ranger
+      - install -Dm755 ranger-wrapper ${FLATPAK_DEST}/bin/ranger
+     #- ln -s ../lib/ranger-portable/ranger-portable ${FLATPAK_DEST}/bin/ranger
+    sources:
+      - type: script
+        dest-filename: ranger-wrapper
+        commands:
+          - |
+            process_path="$(realpath ${0})"
+            ranger_path="${process_path%/*/*}/lib/ranger-portable"
+            cwd="${PWD}"
+            if [ -x "${ranger_path}/ranger-portable" ]; then
+              cd "${ranger_path}"
+              exec ./ranger-portable "${@}" "${cwd}"
+            else
+              2>&1 echo "Cannot find ranger-portable executable!"
+            fi
     cleanup:
       - /python/lib/python*
 
