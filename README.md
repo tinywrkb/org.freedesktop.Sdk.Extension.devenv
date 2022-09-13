@@ -22,12 +22,12 @@ but the extension is mainly intended to be used with Flatpak packaged IDEs.
 ### Set up build cache
 
 You would want to make sure that ccache is enable and being used by Flatpak Builder (check for ccache hits).  
-Essentially, it mean adding the `--cache` option, setting `CCACHE_DIR` environment variable, if ccache dir is not in the
+Essentially, it means adding the `--cache` option, setting `CCACHE_DIR` environment variable, if ccache dir is not in the
 default location.  
-Flatpak Builder will mount the ccache dir to `/run/ccache` in the sandbox and will set `CCACHE_DIR` to this path.
+Flatpak Builder will bind mount ccache dir to `/run/ccache` in the sandbox and will set `CCACHE_DIR` to this path.
 
 To give access to sccache and golang build cache dirs, move them to `CCACHE_DIR/sccache` and `CCACHE_DIR/gocache`
-accordingly, and then linked to them from `XDG_CACHE_DIR/sccache` and `XDG_CACHE_DIR/go-build`, so they will still be
+accordingly, and then link to them from `XDG_CACHE_DIR/sccache` and `XDG_CACHE_DIR/go-build`, so they will still be
 shared with toolchains running directly in the host environment.
 
 ### Dependencies
