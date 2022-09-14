@@ -4264,8 +4264,9 @@ modules:
           url-template: https://github.com/axel-download-accelerator/axel/releases/download/v$version/axel-$version.tar.gz
 
   - name: bind-static
-    # TODO: fix symlink creation in /bin
     # TODO: binaries are broken
+    build-options:
+      ldflags: -lkrb5support -lkrb5_spake -lkrb5_pkinit -lncursesw
     config-opts:
       - --sbindir=${prefix}/bin
       - --enable-static
@@ -4297,7 +4298,14 @@ modules:
       # workaround for buildsystem making unneeded filesystem changes after install and breaking rofiles
       - DESTDIR=${FLATPAK_BUILDER_BUILDDIR}/target
     post-install:
-      - cp -r target/${FLATPAK_DEST}/* ${FLATPAK_DEST}/
+      - |
+        set -e
+        for prog in arpaname dig host nslookup; do
+          install -Dm755 target/${FLATPAK_DEST}/bin/${prog} -t ${FLATPAK_DEST}/bin/
+          if [ -f target/${FLATPAK_DEST}/man/man1/${prog}.1 ]; then
+            install -Dm644 target/${FLATPAK_DEST}/share/man/man1/${prog}.1 -t ${FLATPAK_DEST}/share/man/man1/
+          fi
+        done
     sources:
       - type: archive
         url: https://downloads.isc.org/isc/bind9/9.18.6/bind-9.18.6.tar.xz
@@ -4309,14 +4317,8 @@ modules:
           url-template: https://downloads.isc.org/isc/bind9/$version/bind-$version.tar.xz
       - type: shell
         commands:
-          - sed -i 's/\(^READLINE_LIBS.*=.*\)/\1 -lncursesw/' $(find . -name Makefile.in)
-          - sed -i '/GSSAPI_LIBS=/ s/\(`.*--libs gssapi`\)/"\1 -lkrb5support -lkrb5_spake
-            -lkrb5_pkinit"/' configure
-          - sed -i '/KRB5_LIBS=/ s/\(`.*--libs krb5`\)/"\1 -lkrb5support -lkrb5_spake
-            -lkrb5_pkinit"/' configure
-    cleanup:
-      - /lib
-      - '*' # TODO: remove after fixing the module
+          - sed -i 's/\(named\|rndc\|delv\|dnssec\|nsupdate\|check\|confgen\|tests\|plugins\)//g' bin/Makefile.am
+          - autoreconf -fiv
     modules:
       - name: libnghttp2-static
         config-opts:
