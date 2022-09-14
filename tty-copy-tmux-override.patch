@@ -1,0 +1,27 @@
+diff --git a/tty-copy.c b/tty-copy.c
+index 8dca4ca..d8ecd0d 100644
+--- a/tty-copy.c
++++ b/tty-copy.c
+@@ -145,7 +145,7 @@ static void parse_opts (int argc, char * const *argv) {
+ 		opts.tty_path = _PATH_TTY;
+ 	}
+ 
+-	const char *term = NULL;
++	const char *term = NULL, *tmux_override = NULL;
+ 	if (term_type != NULL) {
+ 		opts.is_screen = str_equal(term_type, "screen");
+ 		opts.is_tmux = str_equal(term_type, "tmux");
+@@ -154,8 +154,11 @@ static void parse_opts (int argc, char * const *argv) {
+ 		if (str_startswith(term, "screen")) {
+ 			// Since tmux defaults to setting TERM=screen (ugh), we need to detect
+ 			// it here specially.
+-			if (getenv("TMUX") != NULL) {
+-				opts.is_tmux = true;
++			tmux_override = getenv("TTYCOPY_TMUX_OVERRIDE");
++			if (getenv("TMUX") != NULL &&
++				(tmux_override == NULL ||
++				strcmp(tmux_override, "1") != 0 )) {
++					opts.is_tmux = true;
+ 			} else {
+ 				opts.is_screen = true;
+ 			}

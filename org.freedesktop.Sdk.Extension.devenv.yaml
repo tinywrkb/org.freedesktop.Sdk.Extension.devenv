@@ -2343,6 +2343,8 @@ modules:
           project-id: 242728
           stable-only: true
           url-template: https://github.com/jirutka/tty-copy/archive/v$version/tty-copy-$version.tar.gz
+      - type: patch
+        path: tty-copy-tmux-override.patch
 
   - name: wl-clipboard-static
     buildsystem: meson
