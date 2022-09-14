@@ -2327,6 +2327,23 @@ modules:
   ####     Clipboard      ####
   ############################
 
+  - name: tty-copy-static
+    no-autogen: true
+    make-args:
+      - build-exec
+    install-rule: install-exec
+    make-install-args:
+      - PREFIX=${FLATPAK_DEST}
+    sources:
+      - type: archive
+        url: https://github.com/jirutka/tty-copy/archive/v0.2.2/tty-copy-0.2.2.tar.gz
+        sha256: 5dad7c9eeb1f13747f989e38c4165edd367e7c6c348545b28ac8c1fb50cf4716
+        x-checker-data:
+          type: anitya
+          project-id: 242728
+          stable-only: true
+          url-template: https://github.com/jirutka/tty-copy/archive/v$version/tty-copy-$version.tar.gz
+
   - name: wl-clipboard-static
     buildsystem: meson
     config-opts:
@@ -2359,6 +2376,7 @@ modules:
           url-template: https://github.com/astrand/xclip/archive/$version/xclip-$version.tar.gz
     cleanup:
       - /bin/xclip-*file
+
 # - name: xsel-static
 #   build-options:
 #     ldflags: -Wl,-lX11,-lxcb,-lX11-xcb,-lXau,-lxcb-xinput,-lxcb-xkb,-lXdmcp,-lXext,-lXmu,-lXmuu,-lXt,-lSM,-lICE
