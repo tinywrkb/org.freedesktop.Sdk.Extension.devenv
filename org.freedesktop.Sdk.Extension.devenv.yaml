@@ -2520,6 +2520,7 @@ modules:
     buildsystem: cmake-ninja
     builddir: true
     post-install:
+      - ln -s nvim ${FLATPAK_DEST}/bin/e
       - ln -s nvim ${FLATPAK_DEST}/bin/vim
     sources:
       - type: archive
