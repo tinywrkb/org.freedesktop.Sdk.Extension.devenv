@@ -4265,6 +4265,7 @@ modules:
 
   - name: bind-static
     # TODO: binaries are broken
+    #       failing on trampolines[i] NULL check, possibly trampolines isn't initialized correctly
     build-options:
       ldflags: -lkrb5support -lkrb5_spake -lkrb5_pkinit -lncursesw
     config-opts:
