@@ -5670,7 +5670,7 @@ modules:
         dest-filename: enable-devenv
         commands:
           - |
-            # simple enable.sh locating logic that should affect setting the correct prefix
+            # simple enable.sh locating logic that shouldn't affect setting the correct prefix with other shell scripts (enable.sh, bashrc)
             get_devenv_auto_prefix(){
               local devenv_prefix
               local process_path="$(realpath "${0}")"

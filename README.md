@@ -2,11 +2,11 @@
 
 This is a little experiement of packaging a user-defined shell environment with CLI tools as a Flatpak SDK extension.  
 Naming is not very imaginative, and might change.  
-I didn't like the alterntives, connecting a shell from a Flatpak sandbox to a host shell or a Podman container shell,
+I didn't like the alternatives, connecting a shell from a Flatpak sandbox to a host shell or a Podman container shell,
 both sound self-defeating. There should be a good reason to break out of the Flatpak sandbox.  
-Shorty after I started playing with this, I figured that there's no reason why I shouldn't re-use this for other
-containers, making use of Flatpak's packaging tools to build and keep this updated, so for the most part, the packaged
-binaries are statically linked, which also avoids introducing shared libraries.  
+Shorty after I started playing with this, I figured out that there's no reason why I shouldn't re-use this with other
+containers, taking advantage of Flatpak's packaging tools to build and keep this updated, so for the most part, the
+packaged binaries are statically linked, which also avoids introducing shared libraries.  
 This is very opiniated and user-specific, so you probably don't want to use this as it is, but it will give you a good
 idea how to package your own custom environment.  
 It should be noted that [a running Flatpak instance will lose a mounted extension when the latter is updated](https://github.com/flatpak/flatpak/issues/4356).  
