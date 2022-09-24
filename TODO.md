@@ -4,7 +4,6 @@
 * fish: source the correct config.fish
 * fish: possibly patch `__fish_build_paths.fish`
 * enable-sdk
-* Remove how-to section
 * possible failure mapping of sdk path
   * stow: hardcoded perl `use dir`, can be patched
   * luajit: dynamically linked bindings, not sure if working

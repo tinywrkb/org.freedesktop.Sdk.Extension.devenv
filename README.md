@@ -47,7 +47,8 @@ as there are a good number of git sources here.
 ## Tips
 
 * Set default shell
-  * Set `DEVENV_SHELL` variable in the host environment or as Flatpak override one of the packaged shell
+  * Set `DEVENV_SHELL` variable in the host environment or as a Flatpak override to one of the packaged shells:
+    `bash` (default), `foot`, or `zsh`.
 
 * Easily enable extension and enter shell
   * Set this variable in the host environment: `DEVENV_EXEC=/usr/lib/sdk/devenv/bin/enable-devenv`
